@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
 import {
   ArrowRight,
   BarChart3,
   BriefcaseBusiness,
+  Check,
+  FileText,
+  Gamepad2,
   GraduationCap,
   MessageSquareText,
   RotateCw,
@@ -17,6 +21,8 @@ import {
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge, Card, CardTitle, EmptyState, Progress, Skeleton, SkillPill } from "@/components/ui/primitives";
 import { Heading, Metric, ScoreRing } from "@/components/workspace/shared";
+import { CountUp } from "@/components/ui/motion";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/lib/workspace-provider";
 
@@ -68,9 +74,7 @@ export function DashboardPage() {
     dashboard,
     matches,
     roadmap,
-    interviewHistory,
     notifications,
-    unread,
     live,
     loading,
     error,
@@ -183,29 +187,23 @@ export function DashboardPage() {
     color: appStatusColors[status] || "#F4B942",
   }));
 
+  const journey: JourneyStep[] = [
+    { label: "Upload resume", href: "/resume", icon: FileText, done: dashboard.skills.total > 0 },
+    { label: "Match a career", href: "/career", icon: Target, done: ready > 0 },
+    { label: "Build roadmap", href: "/learn", icon: GraduationCap, done: roadmapItems.length > 0 },
+    { label: "Practice interview", href: "/interviews", icon: MessageSquareText, done: (dashboard.interviews?.completed ?? 0) > 0 },
+    { label: "Apply to a role", href: "/jobs", icon: BriefcaseBusiness, done: appsTotal > 0 },
+  ];
+
   return (
     <AppShell>
-      <Heading
-        eyebrow="Candidate career workspace"
-        title="Your dashboard at a glance"
-        detail={`Welcome back, ${user?.name || "there"}. Here is your live career readiness, skill gap analysis, and matched jobs.`}
-        action={
-          <div className="flex items-center gap-2">
-            <Badge tone={live ? "primary" : "gray"}>
-              <span className="mr-1.5 size-1.5 rounded-full bg-[#E99A32]" />
-              {live ? "Live synced" : "Standby"}
-            </Badge>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void refresh()}
-              disabled={loading}
-            >
-              <RotateCw size={13} className={loading ? "animate-spin" : ""} />
-              {loading ? "Refreshing…" : "Refresh"}
-            </Button>
-          </div>
-        }
+      <WelcomeHero
+        name={user?.name || "there"}
+        readiness={ready}
+        journey={journey}
+        live={live}
+        loading={loading}
+        onRefresh={() => void refresh()}
       />
 
       {/* 4 Stat Cards Row using approved tints */}
@@ -240,6 +238,8 @@ export function DashboardPage() {
         />
       </div>
 
+      <QuestPromo />
+
       {/* Balanced Grid: 2/3 Skill Gap Card and 1/3 Roadmap Card */}
       <div className="mt-5 grid gap-5 lg:grid-cols-3 items-start">
         {/* Skill Gap Card (2/3 width on desktop) */}
@@ -259,34 +259,34 @@ export function DashboardPage() {
 
           {/* 3 Metric Mini-tiles */}
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-[#EDE6DA] bg-[#FFF5E5]/70 p-3.5">
+            <div className="rounded-xl border border-[#EDE6DA] bg-[#FFF5E5]/70 p-3.5 transition hover:-translate-y-0.5 hover:border-[#F4B942]">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-[#75451F]">Matched</span>
                 <span className="text-xs font-bold text-[#75451F]">{matchedPercent}%</span>
               </div>
-              <p className="mt-1 text-2xl font-bold text-[#24211D]">{dashboard.skills.matched}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-[#24211D]"><CountUp value={dashboard.skills.matched} /></p>
               <div className="mt-2.5">
                 <Progress value={matchedPercent} />
               </div>
             </div>
 
-            <div className="rounded-xl border border-[#EDE6DA] bg-[#FFF5E5]/40 p-3.5">
+            <div className="rounded-xl border border-[#EDE6DA] bg-[#FFF5E5]/40 p-3.5 transition hover:-translate-y-0.5 hover:border-[#F4B942]">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-[#75451F]">Partial</span>
                 <span className="text-xs font-bold text-[#75451F]">{partialPercent}%</span>
               </div>
-              <p className="mt-1 text-2xl font-bold text-[#24211D]">{dashboard.skills.partial || 0}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-[#24211D]"><CountUp value={dashboard.skills.partial || 0} /></p>
               <div className="mt-2.5">
                 <Progress value={partialPercent} />
               </div>
             </div>
 
-            <div className="rounded-xl border border-[#EDE6DA] bg-white p-3.5">
+            <div className="rounded-xl border border-[#EDE6DA] bg-white p-3.5 transition hover:-translate-y-0.5 hover:border-[#F4B942]">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-[#6F675C]">Missing</span>
                 <span className="text-xs font-bold text-[#6F675C]">{missingPercent}%</span>
               </div>
-              <p className="mt-1 text-2xl font-bold text-[#24211D]">{dashboard.skills.missing}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-[#24211D]"><CountUp value={dashboard.skills.missing} /></p>
               <div className="mt-2.5">
                 <Progress value={missingPercent} />
               </div>
@@ -305,7 +305,7 @@ export function DashboardPage() {
                     <p className="text-xs font-bold text-[#24211D] mb-2">{category}</p>
                     <div className="flex flex-wrap gap-1.5">
                       {skills.map((s) => (
-                        <SkillPill key={s} tone="default">
+                        <SkillPill key={s} tone="matched">
                           {s}
                         </SkillPill>
                       ))}
@@ -397,8 +397,13 @@ export function DashboardPage() {
                 </thead>
                 <tbody className="divide-y divide-[#EDE6DA]/70">
                   {matchedJobs.slice(0, 5).map((job) => (
-                    <tr key={job.id} className="hover:bg-[#FFF5E5]/40 transition-colors">
-                      <td className="py-3 font-bold text-[#24211D]">{job.title}</td>
+                    <tr key={job.id} className="group transition-colors hover:bg-[#FFF5E5]/60">
+                      <td className="py-3 font-bold text-[#24211D]">
+                        <Link href={`/jobs?q=${encodeURIComponent(job.title)}`} className="inline-flex items-center gap-1.5 group-hover:text-[#75451F]">
+                          {job.title}
+                          <ArrowRight size={12} className="-translate-x-1 opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100" />
+                        </Link>
+                      </td>
                       <td className="py-3 text-[#6F675C]">{job.company}</td>
                       <td className="py-3">
                         <Badge tone={job.match_percent >= 75 ? "green" : "primary"}>
@@ -556,5 +561,187 @@ export function DashboardPage() {
         </Card>
       </div>
     </AppShell>
+  );
+}
+
+type JourneyStep = {
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  done: boolean;
+};
+
+function greeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
+function WelcomeHero({
+  name,
+  readiness,
+  journey,
+  live,
+  loading,
+  onRefresh,
+}: {
+  name: string;
+  readiness: number;
+  journey: JourneyStep[];
+  live: boolean;
+  loading: boolean;
+  onRefresh: () => void;
+}) {
+  const reduce = useReducedMotion();
+  const doneCount = journey.filter((step) => step.done).length;
+  const nextStep = journey.find((step) => !step.done);
+  const firstName = name.split(" ")[0];
+
+  return (
+    <motion.section
+      initial={reduce ? false : { opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="relative mb-6 overflow-hidden rounded-3xl bg-gradient-to-br from-[#3A2512] via-[#5C3818] to-[#8A5422] p-6 text-white shadow-[0_24px_60px_-28px_rgba(117,69,31,0.75)] sm:p-8"
+    >
+      <div className="dot-grid pointer-events-none absolute inset-0 opacity-[0.18] [background-image:radial-gradient(rgba(255,255,255,0.5)_1px,transparent_1px)]" />
+      <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-[#F4B942]/30 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-28 left-1/3 size-64 rounded-full bg-[#E99A32]/20 blur-3xl" />
+
+      <div className="relative grid items-center gap-7 lg:grid-cols-[1fr_auto]">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#F4D9A6]">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 normal-case tracking-normal">
+              <span className={cn("size-1.5 rounded-full", live ? "live-dot bg-[#7CE38B]" : "bg-white/50")} />
+              {live ? "Live synced" : "Standby"}
+            </span>
+            Candidate workspace
+          </div>
+          <h1 className="font-display mt-3 text-3xl font-bold tracking-tight sm:text-[38px] sm:leading-[1.1]">
+            {greeting()}, <span className="bg-gradient-to-r from-[#FFE3A3] to-[#F4B942] bg-clip-text text-transparent">{firstName}</span>
+          </h1>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/70">
+            {nextStep
+              ? `You're ${doneCount} of ${journey.length} steps into your career journey. Next up: ${nextStep.label.toLowerCase()}.`
+              : "Every step of your journey is complete. Keep your scores fresh and keep applying."}
+          </p>
+
+          {/* Journey stepper */}
+          <ol className="mt-6 flex flex-wrap items-center gap-y-3">
+            {journey.map((step, index) => {
+              const Icon = step.icon;
+              const isNext = step === nextStep;
+              return (
+                <li key={step.href} className="flex items-center">
+                  <Link
+                    href={step.href}
+                    title={step.label}
+                    className={cn(
+                      "group flex items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-3 text-xs font-semibold transition hover:-translate-y-0.5",
+                      step.done
+                        ? "border-[#F4B942]/40 bg-[#F4B942]/20 text-[#FFE3A3]"
+                        : isNext
+                          ? "border-white/40 bg-white text-[#5C3818] shadow-[0_0_0_4px_rgba(255,255,255,0.12)]"
+                          : "border-white/15 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "grid size-6 place-items-center rounded-full",
+                        step.done ? "bg-[#F4B942] text-[#3A2512]" : isNext ? "bg-[#F4B942] text-[#3A2512]" : "bg-white/10",
+                      )}
+                    >
+                      {step.done ? <Check size={13} strokeWidth={3} /> : <Icon size={12} />}
+                    </span>
+                    {step.label}
+                    {isNext && <ArrowRight size={12} className="transition group-hover:translate-x-0.5" />}
+                  </Link>
+                  {index < journey.length - 1 && (
+                    <span className={cn("mx-1.5 h-px w-4 sm:w-6", step.done ? "bg-[#F4B942]/60" : "bg-white/15")} />
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+
+        <div className="flex items-center gap-5 lg:flex-col lg:items-end">
+          <div className="relative grid size-[132px] place-items-center rounded-full bg-white/[0.06] p-2 ring-1 ring-white/10">
+            <HeroRing value={readiness} />
+          </div>
+          <button
+            onClick={onRefresh}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-white backdrop-blur hover:bg-white/20 disabled:opacity-60"
+          >
+            <RotateCw size={13} className={loading ? "animate-spin" : ""} />
+            {loading ? "Refreshing…" : "Refresh data"}
+          </button>
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
+function HeroRing({ value }: { value: number }) {
+  const reduce = useReducedMotion();
+  const r = 42;
+  const circ = 2 * Math.PI * r;
+  const bounded = Math.max(0, Math.min(100, value));
+  return (
+    <div className="relative size-full" role="img" aria-label={`Readiness score ${bounded}%`}>
+      <svg viewBox="0 0 100 100" className="size-full -rotate-90">
+        <defs>
+          <linearGradient id="hero-ring" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#FFE3A3" />
+            <stop offset="100%" stopColor="#E99A32" />
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="8" />
+        <motion.circle
+          cx="50"
+          cy="50"
+          r={r}
+          fill="none"
+          stroke="url(#hero-ring)"
+          strokeWidth="8"
+          strokeLinecap="round"
+          strokeDasharray={circ}
+          initial={reduce ? false : { strokeDashoffset: circ }}
+          animate={{ strokeDashoffset: circ * (1 - bounded / 100) }}
+          transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+        />
+      </svg>
+      <div className="absolute inset-0 grid place-items-center text-center">
+        <div>
+          <p className="font-display text-[28px] font-bold leading-none tabular-nums">
+            <CountUp value={bounded} suffix="%" />
+          </p>
+          <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-white/60">Readiness</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function QuestPromo() {
+  return (
+    <Link
+      href="/career-quest"
+      className="group relative mt-5 flex flex-col items-start gap-4 overflow-hidden rounded-2xl border border-[#F4B942]/50 bg-gradient-to-r from-[#FFF5E5] via-[#FFF9EE] to-[#FFEFD0] p-5 transition hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-20px_rgba(233,154,50,0.6)] sm:flex-row sm:items-center sm:p-6"
+    >
+      <span className="float-slow grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#F4B942] to-[#E99A32] text-[#3A2512] shadow-[0_10px_24px_-10px_rgba(233,154,50,0.9)]">
+        <Gamepad2 size={26} />
+      </span>
+      <div className="flex-1">
+        <p className="eyebrow">New · Career Quest</p>
+        <p className="font-display mt-0.5 text-lg font-bold text-[#24211D]">Play a day as a Software Engineer</p>
+        <p className="mt-0.5 text-xs text-[#6F675C]">Debug real APIs, handle an incident with an AI manager, earn XP and a readiness report.</p>
+      </div>
+      <span className="shine inline-flex items-center gap-2 rounded-xl bg-[#24211D] px-4 py-2.5 text-sm font-semibold text-white transition group-hover:bg-[#3A2512]">
+        Play now <ArrowRight size={15} className="transition group-hover:translate-x-1" />
+      </span>
+    </Link>
   );
 }

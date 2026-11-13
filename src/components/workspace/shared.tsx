@@ -1,8 +1,18 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { AlertCircle, Cpu, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CountUp } from "@/components/ui/motion";
+
+/** Renders "82%", "12", "4.5 hrs" with a count-up on the leading number. */
+function AnimatedValue({ value }: { value: string }) {
+  const match = value.match(/^(-?\d+(?:\.\d+)?)(.*)$/);
+  if (!match) return <>{value}</>;
+  const decimals = match[1].includes(".") ? match[1].split(".")[1].length : 0;
+  return <CountUp value={Number(match[1])} suffix={match[2]} decimals={decimals} />;
+}
 
 export function Heading({
   eyebrow,
@@ -16,9 +26,12 @@ export function Heading({
   action?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+    <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
       <div className="min-w-0">
-        <p className="eyebrow">{eyebrow}</p>
+        <p className="eyebrow inline-flex items-center gap-2">
+          <span className="h-px w-5 bg-gradient-to-r from-[#E99A32] to-transparent" />
+          {eyebrow}
+        </p>
         <h1 className="font-display mt-1.5 text-2xl font-bold tracking-tight text-[#24211D] sm:text-[30px] sm:leading-tight">
           {title}
         </h1>
@@ -55,17 +68,23 @@ export function Metric({
   };
 
   return (
-    <section className="surface p-4 sm:p-5">
+    <section className="surface surface-hover group overflow-hidden p-4 sm:p-5">
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#6F675C]">{label}</span>
-        <span className={cn("grid size-9 place-items-center rounded-xl border", tints[tint] ?? tints.primary)}>
+        <span
+          className={cn(
+            "grid size-9 place-items-center rounded-xl border transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110",
+            tints[tint] ?? tints.primary,
+          )}
+        >
           <Icon size={17} />
         </span>
       </div>
-      <p className="font-display mt-3 text-2xl font-bold leading-none tracking-tight text-[#24211D] sm:text-[28px]">
-        {value}
+      <p className="font-display mt-3 text-2xl font-bold leading-none tracking-tight text-[#24211D] tabular-nums sm:text-[28px]">
+        <AnimatedValue value={value} />
       </p>
       <p className="mt-2 text-xs leading-4 text-[#6F675C]">{caption}</p>
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] origin-left scale-x-0 bg-gradient-to-r from-[#F4B942] to-[#E99A32] transition-transform duration-500 group-hover:scale-x-100" />
     </section>
   );
 }
@@ -125,6 +144,8 @@ export function ScoreRing({
   size?: number;
 }) {
   const score = value === null ? 0 : Math.max(0, Math.min(100, Math.round(value)));
+  const gradientId = `ring-${useId().replace(/:/g, "")}`;
+  const reduce = useReducedMotion();
   const r = 40;
   const circ = 2 * Math.PI * r;
   const strokeOffset = circ * (1 - score / 100);
@@ -148,22 +169,29 @@ export function ScoreRing({
           stroke="#FFF5E5"
           strokeWidth="9"
         />
-        <circle
+        <defs>
+          <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#F4B942" />
+            <stop offset="100%" stopColor="#E99A32" />
+          </linearGradient>
+        </defs>
+        <motion.circle
           cx="50"
           cy="50"
           r={r}
           fill="none"
-          stroke="#F4B942"
+          stroke={`url(#${gradientId})`}
           strokeWidth="9"
           strokeLinecap="round"
           strokeDasharray={circ}
-          strokeDashoffset={value === null ? circ : strokeOffset}
-          style={{ transition: "stroke-dashoffset 0.8s ease-out" }}
+          initial={reduce ? false : { strokeDashoffset: circ }}
+          animate={{ strokeDashoffset: value === null ? circ : strokeOffset }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
         <span className="font-display text-2xl font-bold leading-none text-[#24211D]">
-          {value === null ? "—" : `${score}%`}
+          {value === null ? "—" : <CountUp value={score} suffix="%" />}
         </span>
         <span className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-[#6F675C]">
           {label}

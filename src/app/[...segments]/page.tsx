@@ -20,6 +20,11 @@ export default async function RoutedPage({ params }: RouteProps) {
   };
   const workspaceRoutes: Record<string, WorkspaceMode> = {
     "/dashboard": "dashboard",
+    "/career-quest": "careerQuest",
+    "/career-quest/run": "careerQuest",
+    "/twin": "digitalTwin",
+    "/market": "marketIntel",
+    "/exchange": "skillExchange",
     "/dashboard/resume": "resume",
     "/dashboard/career": "career",
     "/dashboard/skills": "career",
@@ -52,7 +57,9 @@ export default async function RoutedPage({ params }: RouteProps) {
     "/recruiter/profile": "recruiter",
   };
   if (authRoutes[path]) return <AuthFlow mode={authRoutes[path]} />;
-  if (workspaceRoutes[path]) return <WorkspacePage mode={workspaceRoutes[path]} />;
+  if (workspaceRoutes[path] || path.startsWith("/career-quest/run/")) {
+    return <WorkspacePage mode={workspaceRoutes[path] || "careerQuest"} />;
+  }
   if (path === "/about" || path === "/features") return <LandingPage />;
   notFound();
 }

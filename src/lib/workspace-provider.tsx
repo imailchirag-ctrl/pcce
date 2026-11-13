@@ -117,6 +117,10 @@ const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
 
 const WORKSPACE_ROOTS = [
   "/dashboard",
+  "/career-quest",
+  "/twin",
+  "/market",
+  "/exchange",
   "/resume",
   "/career",
   "/learn",

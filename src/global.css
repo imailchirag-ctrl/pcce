@@ -162,6 +162,98 @@ details summary::-webkit-details-marker {
   }
 }
 
+/* ---------- Ambient + interactive layer ---------- */
+
+/* Soft warm mesh behind workspace pages */
+.ambient-bg {
+  background:
+    radial-gradient(900px 480px at 100% -10%, rgba(244, 185, 66, 0.16), transparent 60%),
+    radial-gradient(700px 420px at -10% 30%, rgba(233, 154, 50, 0.08), transparent 60%),
+    var(--background);
+  background-attachment: fixed;
+}
+
+/* Cursor-following spotlight on cards (vars set by a global pointer listener) */
+.surface {
+  position: relative;
+  isolation: isolate;
+}
+.surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(244, 185, 66, 0.13), transparent 45%);
+}
+.surface:hover::before {
+  opacity: 1;
+}
+.surface:hover {
+  border-color: #E8D6B6;
+}
+
+/* Gradient text accent */
+.text-gradient {
+  background: linear-gradient(100deg, #75451F 0%, #E99A32 55%, #F4B942 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Animated shine sweep (for hero banners / primary CTAs) */
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+.shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
+  animation: shine-sweep 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes shine-sweep {
+  0%, 60% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+/* Gentle float for decorative elements */
+.float-slow {
+  animation: float-y 6s ease-in-out infinite;
+}
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Dot grid texture */
+.dot-grid {
+  background-image: radial-gradient(rgba(117, 69, 31, 0.14) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* Press feedback on any button */
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* Thin warm scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #E3D3B8 transparent;
+}
+
+:focus-visible {
+  outline: 2px solid #E99A32;
+  outline-offset: 2px;
+}
+
 /* Respect prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   *,

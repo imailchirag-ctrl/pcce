@@ -8,6 +8,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 const RESERVED = new Set(["auth", "events"]);
+// Mutations on these prefixes must originate from the SkillBridge workspace itself.
+const SAME_ORIGIN_PREFIXES = new Set(["career-quests", "twin", "market", "exchange"]);
 
 async function proxy(request: NextRequest, path: string[]) {
   if (!path.length || RESERVED.has(path[0])) {
@@ -15,6 +17,16 @@ async function proxy(request: NextRequest, path: string[]) {
       { error: { code: "not_found", message: "This endpoint is not proxied." } },
       { status: 404 },
     );
+  }
+
+  if (SAME_ORIGIN_PREFIXES.has(path[0]) && !["GET", "HEAD"].includes(request.method)) {
+    const origin = request.headers.get("origin");
+    if (origin && origin !== request.nextUrl.origin) {
+      return Response.json(
+        { error: { code: "origin_rejected", message: "This request must come from the SkillBridge workspace." } },
+        { status: 403 },
+      );
+    }
   }
 
   const token = await getSessionToken();

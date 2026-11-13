@@ -46,13 +46,13 @@ function GoogleIcon({ className }: { className?: string }) {
 
 const ERROR_MESSAGES: Record<string, string> = {
   google_cancelled: "Google sign-in was cancelled.",
-  google_not_configured: "Google sign-in is not configured yet. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.",
+  google_not_configured: "Google sign-in is not configured yet. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and the matching INTERNAL_API_SECRET in both app environments.",
   google_email_unverified: "Your Google account email is not verified.",
   google_state_mismatch: "Security validation failed. Please try signing in again.",
   google_token_failed: "Unable to retrieve credentials from Google. Please try again.",
   google_account_failed: "Could not create or link your account with Google.",
   google_unavailable: "Google authentication service is currently unreachable.",
-  backend_unavailable: "The SkillBridge service is not running. Please start the backend.",
+  backend_unavailable: "The API service is not running. Start the app with npm run dev:all.",
 };
 
 function AuthFrame({
@@ -143,7 +143,7 @@ function AuthFrame({
 function AuthFlowInner({ mode }: { mode: AuthMode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { reloadSession } = useWorkspace();
+  const { googleAvailable, reloadSession } = useWorkspace();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -259,23 +259,24 @@ function AuthFlowInner({ mode }: { mode: AuthMode }) {
         </div>
       )}
 
-      {/* Continue with Google button placed ABOVE an 'or' divider and email form */}
-      <div className="mt-5">
-        <a
-          href="/api/auth/google/start"
-          className="flex w-full items-center justify-center gap-3 rounded-xl border border-[#EDE6DA] bg-white px-4 py-2.5 text-xs font-semibold text-[#24211D] shadow-sm hover:bg-[#FFF5E5] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F4B942]"
-          aria-label="Continue with Google"
-        >
-          <GoogleIcon />
-          <span>Continue with Google</span>
-        </a>
+      {googleAvailable && (
+        <div className="mt-5">
+          <a
+            href="/api/auth/google/start"
+            className="flex w-full items-center justify-center gap-3 rounded-xl border border-[#EDE6DA] bg-white px-4 py-2.5 text-xs font-semibold text-[#24211D] shadow-sm hover:bg-[#FFF5E5] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F4B942]"
+            aria-label="Continue with Google"
+          >
+            <GoogleIcon />
+            <span>Continue with Google</span>
+          </a>
 
-        <div className="my-4 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-wider text-[#6F675C]">
-          <span className="h-px flex-1 bg-[#EDE6DA]" />
-          or
-          <span className="h-px flex-1 bg-[#EDE6DA]" />
+          <div className="my-4 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-wider text-[#6F675C]">
+            <span className="h-px flex-1 bg-[#EDE6DA]" />
+            or
+            <span className="h-px flex-1 bg-[#EDE6DA]" />
+          </div>
         </div>
-      </div>
+      )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         {signup && (

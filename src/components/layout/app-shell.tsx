@@ -2,16 +2,19 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   Activity,
   ArrowRight,
   Bell,
   Bookmark,
+  BrainCircuit,
   BriefcaseBusiness,
   CheckCheck,
   ChevronDown,
   FileText,
+  Gamepad2,
   GraduationCap,
   LayoutDashboard,
   LogOut,
@@ -21,6 +24,7 @@ import {
   Search,
   Settings2,
   Sparkles,
+  TrendingUp,
   UserRound,
   Users,
   X,
@@ -29,12 +33,18 @@ import {
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/lib/workspace-provider";
 import { Badge, Toast } from "@/components/ui/primitives";
+import { SpotlightTracker } from "@/components/ui/motion";
+import { CommandPalette, type PaletteItem } from "@/components/layout/command-palette";
 
 const candidateLinks = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/resume", label: "Resume intelligence", icon: FileText },
   { href: "/career", label: "Career match", icon: Sparkles },
   { href: "/learn", label: "Learning hub", icon: GraduationCap },
+  { href: "/career-quest", label: "Career Quest", icon: Gamepad2 },
+  { href: "/twin", label: "Digital Twin", icon: BrainCircuit },
+  { href: "/market", label: "Market Intelligence", icon: TrendingUp },
+  { href: "/exchange", label: "Skill Exchange", icon: Users },
   { href: "/interviews", label: "Mock interviews", icon: MessageSquareText },
   { href: "/jobs", label: "Explore jobs", icon: BriefcaseBusiness },
   { href: "/applications", label: "Applications", icon: Bookmark },
@@ -90,8 +100,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [shownPath, setShownPath] = useState(pathname);
+  const reduceMotion = useReducedMotion();
   const bellRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
@@ -106,11 +118,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("skillbridge-toast", show);
   }, []);
 
-  useEffect(() => {
+  // Close any open menus when the route changes (render-time reset, no effect needed).
+  if (shownPath !== pathname) {
+    setShownPath(pathname);
     setOpen(false);
     setBellOpen(false);
     setUserOpen(false);
-  }, [pathname]);
+  }
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setPaletteOpen((value) => !value);
+      } else if (event.key === "Escape") {
+        setBellOpen(false);
+        setUserOpen(false);
+        setOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
@@ -124,8 +153,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const aiOnline = Boolean(modelStatus);
 
-  const submitSearch = () => {
-    const term = query.trim();
+  const paletteItems = useMemo<PaletteItem[]>(
+    () => [
+      ...navItems.map((item) => ({ id: item.href, label: item.label, group: "Go to", icon: item.icon, href: item.href })),
+      { id: "/profile", label: "Profile", hint: "Edit your details", group: "Account", icon: UserRound, href: "/profile" },
+      { id: "/settings", label: "Settings", hint: "Password, preferences", group: "Account", icon: Settings2, href: "/settings" },
+      { id: "refresh", label: "Refresh workspace", hint: "Re-sync scores, jobs and activity", group: "Actions", icon: RotateCw, run: () => void refresh() },
+      { id: "read", label: "Mark notifications read", group: "Actions", icon: CheckCheck, run: () => void markAllRead() },
+      { id: "logout", label: "Sign out", group: "Account", icon: LogOut, run: () => void logout() },
+    ],
+    [navItems, refresh, markAllRead, logout],
+  );
+
+  const submitSearch = (term: string) => {
     if (!term) return;
     if (isRecruiter) router.push(`/recruiter/candidates?q=${encodeURIComponent(term)}`);
     else router.push(`/jobs?q=${encodeURIComponent(term)}`);
@@ -180,20 +220,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               href={href}
               onClick={() => setOpen(false)}
               className={cn(
-                "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium transition-colors",
+                "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium transition-colors",
                 active
-                  ? "border border-[#F4B942]/60 bg-[#F4B942]/20 font-semibold text-[#75451F] shadow-sm"
-                  : "border border-transparent text-[#6F675C] hover:bg-[#FFF5E5] hover:text-[#24211D]",
+                  ? "font-semibold text-[#75451F]"
+                  : "text-[#6F675C] hover:bg-[#FFF5E5] hover:text-[#24211D]",
               )}
             >
+              {active && (
+                <motion.span
+                  layoutId={reduceMotion ? undefined : "nav-active"}
+                  className="absolute inset-0 -z-0 rounded-xl border border-[#F4B942]/60 bg-[#F4B942]/20 shadow-sm"
+                  transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                />
+              )}
+              {active && <span className="absolute -left-3 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-[#E99A32]" />}
               <Icon
                 size={17}
                 strokeWidth={active ? 2.2 : 1.9}
-                className={active ? "text-[#75451F]" : "text-[#6F675C] group-hover:text-[#75451F]"}
+                className={cn("relative transition-transform group-hover:scale-110", active ? "text-[#75451F]" : "text-[#6F675C] group-hover:text-[#75451F]")}
               />
-              <span className="flex-1">{label}</span>
+              <span className="relative flex-1">{label}</span>
+              {href === "/career-quest" && !active && (
+                <span className="relative rounded-full bg-gradient-to-r from-[#F4B942] to-[#E99A32] px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-[#24211D]">Play</span>
+              )}
               {href === "/applications" && unread > 0 && (
-                <span className="ml-auto rounded-full bg-[#F4B942] px-1.5 py-0.2 text-[10px] font-bold text-[#75451F]">
+                <span className="relative ml-auto rounded-full bg-[#F4B942] px-1.5 py-0.2 text-[10px] font-bold text-[#75451F]">
                   {unread}
                 </span>
               )}
@@ -247,7 +298,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-[#FFFCF6] text-[#24211D]">
+    <div className="ambient-bg min-h-screen text-[#24211D]">
+      <SpotlightTracker />
       {/* Top progress bar when loading */}
       {loading && (
         <div className="fixed inset-x-0 top-0 z-[70] h-1 overflow-hidden bg-[#FFF5E5]">
@@ -256,7 +308,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Desktop Sidebar (Cream / Warm System) */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[256px] flex-col border-r border-[#EDE6DA] bg-[#FFFCF6] md:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[256px] flex-col border-r border-[#EDE6DA] bg-[#FFFCF6]/90 backdrop-blur-xl md:flex">
         {sidebarContent}
       </aside>
 
@@ -277,7 +329,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="md:pl-[256px] pb-16 md:pb-0">
         {/* Top bar (White / Cream with border) */}
-        <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between gap-3 border-b border-[#EDE6DA] bg-white/95 px-4 backdrop-blur-md sm:px-7">
+        <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between gap-3 border-b border-[#EDE6DA] bg-white/75 px-4 backdrop-blur-xl sm:px-7">
           <div className="flex min-w-0 items-center gap-3">
             <button
               className="grid size-9 place-items-center rounded-xl border border-[#EDE6DA] bg-[#FFFCF6] text-[#6F675C] hover:text-[#24211D] md:hidden"
@@ -287,21 +339,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Menu size={18} />
             </button>
 
-            {/* Search input */}
-            <div className="hidden items-center gap-2 rounded-xl border border-[#EDE6DA] bg-[#FFFCF6] px-3 py-1.5 text-xs sm:flex">
-              <Search size={14} className="text-[#6F675C]" />
-              <input
-                aria-label="Search workspace"
-                placeholder={isRecruiter ? "Search candidates…" : "Search roles, skills…"}
-                className="w-44 bg-transparent outline-none placeholder:text-[#9E9589] lg:w-56 text-[#24211D]"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") submitSearch();
-                }}
-              />
-              <kbd className="rounded border border-[#EDE6DA] bg-white px-1.5 py-0.5 text-[9px] text-[#6F675C]">↵</kbd>
-            </div>
+            {/* Command palette trigger */}
+            <button
+              type="button"
+              onClick={() => setPaletteOpen(true)}
+              aria-label="Open command palette"
+              className="group hidden items-center gap-2 rounded-xl border border-[#EDE6DA] bg-[#FFFCF6] px-3 py-2 text-xs text-[#9E9589] hover:border-[#F4B942] hover:bg-white sm:flex"
+            >
+              <Search size={14} className="text-[#6F675C] group-hover:text-[#75451F]" />
+              <span className="w-40 text-left lg:w-52">{isRecruiter ? "Search candidates, pages…" : "Search roles, pages…"}</span>
+              <kbd className="rounded border border-[#EDE6DA] bg-white px-1.5 py-0.5 text-[9px] font-semibold text-[#6F675C]">Ctrl K</kbd>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaletteOpen(true)}
+              aria-label="Search"
+              className="grid size-9 place-items-center rounded-xl border border-[#EDE6DA] bg-[#FFFCF6] text-[#6F675C] sm:hidden"
+            >
+              <Search size={16} />
+            </button>
 
             <span className="truncate text-xs font-medium text-[#6F675C] sm:hidden">
               {isRecruiter ? "Recruiter" : "Career"} workspace
@@ -352,10 +408,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className="relative grid size-9 place-items-center rounded-xl border border-[#EDE6DA] bg-[#FFFCF6] text-[#6F675C] hover:bg-[#FFF5E5] hover:text-[#24211D] transition-colors"
               >
                 <Bell size={16} />
-                {unread > 0 && <span className="absolute right-2 top-2 size-2 rounded-full bg-[#E99A32]" />}
+                {unread > 0 && (
+                  <span className="absolute right-1.5 top-1.5 grid size-2.5 place-items-center">
+                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#E99A32] opacity-60" />
+                    <span className="relative size-2 rounded-full bg-[#E99A32]" />
+                  </span>
+                )}
               </button>
+              <AnimatePresence>
               {bellOpen && (
-                <div className="absolute right-0 top-12 z-50 w-[340px] max-w-[90vw] overflow-hidden rounded-2xl border border-[#EDE6DA] bg-white shadow-2xl">
+                <motion.div
+                  initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                  transition={{ duration: 0.16 }}
+                  className="absolute right-0 top-12 z-50 w-[340px] max-w-[90vw] origin-top-right overflow-hidden rounded-2xl border border-[#EDE6DA] bg-white shadow-2xl"
+                >
                   <div className="flex items-center justify-between border-b border-[#EDE6DA] bg-[#FFFCF6] px-4 py-3">
                     <div>
                       <p className="text-xs font-bold text-[#24211D]">Notifications</p>
@@ -398,8 +466,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       </div>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               )}
+              </AnimatePresence>
             </div>
 
             {/* User Account Dropdown */}
@@ -425,8 +494,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </span>
                 <ChevronDown size={13} className="hidden text-[#6F675C] sm:block" />
               </button>
+              <AnimatePresence>
               {userOpen && (
-                <div className="absolute right-0 top-12 z-50 w-52 overflow-hidden rounded-xl border border-[#EDE6DA] bg-white p-1.5 shadow-xl">
+                <motion.div
+                  initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                  transition={{ duration: 0.16 }}
+                  className="absolute right-0 top-12 z-50 w-52 origin-top-right overflow-hidden rounded-xl border border-[#EDE6DA] bg-white p-1.5 shadow-xl"
+                >
                   <div className="px-2.5 py-2 border-b border-[#EDE6DA]">
                     <p className="truncate text-xs font-bold text-[#24211D]">{user?.name || "User"}</p>
                     <p className="truncate text-[10px] text-[#6F675C]">{user?.email}</p>
@@ -456,16 +532,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       <LogOut size={14} /> Sign out
                     </button>
                   </div>
-                </div>
+                </motion.div>
               )}
+              </AnimatePresence>
             </div>
           </div>
         </header>
 
         {/* Main Page Workspace Content */}
-        <main className="mx-auto max-w-[1440px] px-4 py-6 sm:px-7 sm:py-8 lg:px-9">
+        <motion.main
+          key={pathname}
+          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto max-w-[1440px] px-4 py-6 sm:px-7 sm:py-8 lg:px-9"
+        >
           {children}
-        </main>
+        </motion.main>
       </div>
 
       {/* Mobile Bottom Navigation Bar (Under 768px) */}
@@ -500,6 +583,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <span>Profile</span>
         </Link>
       </nav>
+
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        items={paletteItems}
+        searchLabel={isRecruiter ? "Search candidates for" : "Search jobs for"}
+        onSearch={submitSearch}
+      />
 
       {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage("")} />}
     </div>

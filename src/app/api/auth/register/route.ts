@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     return response;
   } catch {
     return NextResponse.json(
-      { error: { code: "backend_unavailable", message: "The SkillBridge service is not running. Start it and try again." } },
+      { error: { code: "backend_unavailable", message: "The API service is not running. Start the app with npm run dev:all and try again." } },
       { status: 503 },
     );
   }

@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from typing import Any, Iterator
 
 from app.core.config import get_settings
+from app.intelligence_schema import INTELLIGENCE_SCHEMA
 
 _lock = threading.RLock()
 _initialized = False
@@ -168,6 +169,105 @@ CREATE TABLE IF NOT EXISTS roadmaps (
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS career_quest_runs (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  career_key TEXT NOT NULL,
+  difficulty TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'IN_PROGRESS',
+  catalog_version TEXT NOT NULL,
+  started_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  completed_at TEXT,
+  score_json TEXT,
+  report_json TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_cq_runs_user_started ON career_quest_runs(user_id, started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_cq_runs_user_status ON career_quest_runs(user_id, status);
+
+CREATE TABLE IF NOT EXISTS career_quest_missions (
+  id TEXT PRIMARY KEY,
+  run_id TEXT NOT NULL REFERENCES career_quest_runs(id) ON DELETE CASCADE,
+  sequence INTEGER NOT NULL,
+  template_key TEXT NOT NULL,
+  template_version TEXT NOT NULL,
+  mission_type TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'LOCKED',
+  public_state_json TEXT NOT NULL,
+  score_json TEXT,
+  started_at TEXT,
+  completed_at TEXT,
+  UNIQUE (run_id, sequence)
+);
+CREATE INDEX IF NOT EXISTS idx_cq_missions_run_sequence ON career_quest_missions(run_id, sequence);
+
+CREATE TABLE IF NOT EXISTS career_quest_interactions (
+  id TEXT PRIMARY KEY,
+  run_id TEXT NOT NULL REFERENCES career_quest_runs(id) ON DELETE CASCADE,
+  mission_id TEXT REFERENCES career_quest_missions(id) ON DELETE CASCADE,
+  sequence INTEGER NOT NULL,
+  actor TEXT NOT NULL,
+  interaction_type TEXT NOT NULL,
+  content TEXT NOT NULL,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_cq_interactions_run_sequence ON career_quest_interactions(run_id, sequence);
+
+CREATE TABLE IF NOT EXISTS career_quest_attempts (
+  id TEXT PRIMARY KEY,
+  mission_id TEXT NOT NULL REFERENCES career_quest_missions(id) ON DELETE CASCADE,
+  attempt_number INTEGER NOT NULL,
+  idempotency_key TEXT NOT NULL,
+  status TEXT NOT NULL,
+  runner_job_id TEXT,
+  submission_fingerprint TEXT NOT NULL,
+  result_summary_json TEXT,
+  score REAL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  UNIQUE (mission_id, idempotency_key)
+);
+CREATE INDEX IF NOT EXISTS idx_cq_attempt_mission_created ON career_quest_attempts(mission_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS career_quest_skill_evidence (
+  id TEXT PRIMARY KEY,
+  run_id TEXT NOT NULL REFERENCES career_quest_runs(id) ON DELETE CASCADE,
+  mission_id TEXT NOT NULL REFERENCES career_quest_missions(id) ON DELETE CASCADE,
+  skill_key TEXT NOT NULL,
+  dimension TEXT NOT NULL,
+  score REAL NOT NULL,
+  rubric_version TEXT NOT NULL,
+  evidence_refs_json TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  UNIQUE (mission_id, skill_key, dimension)
+);
+CREATE INDEX IF NOT EXISTS idx_cq_skill_evidence_run ON career_quest_skill_evidence(run_id, skill_key);
+
+CREATE TABLE IF NOT EXISTS career_quest_xp_events (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  run_id TEXT NOT NULL REFERENCES career_quest_runs(id) ON DELETE CASCADE,
+  mission_id TEXT REFERENCES career_quest_missions(id) ON DELETE CASCADE,
+  event_key TEXT NOT NULL,
+  xp_delta INTEGER NOT NULL,
+  reason TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  UNIQUE (user_id, event_key)
+);
+CREATE INDEX IF NOT EXISTS idx_cq_xp_user_created ON career_quest_xp_events(user_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS career_quest_achievement_awards (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  achievement_key TEXT NOT NULL,
+  run_id TEXT NOT NULL REFERENCES career_quest_runs(id) ON DELETE CASCADE,
+  awarded_at TEXT NOT NULL,
+  evidence_json TEXT NOT NULL,
+  UNIQUE (user_id, achievement_key)
+);
+CREATE INDEX IF NOT EXISTS idx_cq_achievements_user ON career_quest_achievement_awards(user_id, awarded_at DESC);
 """
 
 SEED_JOBS: list[dict[str, Any]] = [
@@ -294,7 +394,7 @@ def connection() -> Iterator[sqlite3.Connection]:
 
 
 def _migrate(conn: sqlite3.Connection) -> None:
-    """Add columns introduced after the first local database was created."""
+    """Apply additive compatibility migrations for existing local databases."""
     jobs_columns = {row["name"] for row in conn.execute("PRAGMA table_info(jobs)").fetchall()}
     if "recruiter_id" not in jobs_columns:
         conn.execute("ALTER TABLE jobs ADD COLUMN recruiter_id TEXT")
@@ -316,6 +416,7 @@ def init_db() -> None:
             return
         with connection() as conn:
             conn.executescript(SCHEMA)
+            conn.executescript(INTELLIGENCE_SCHEMA)
             _migrate(conn)
             count = conn.execute("SELECT COUNT(*) AS count FROM jobs").fetchone()["count"]
             if not count:

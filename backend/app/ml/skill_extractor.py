@@ -12,9 +12,10 @@ classification head, so claiming that would be misleading.
 
 from __future__ import annotations
 
-import math
 import re
 from typing import Any
+
+import numpy as np
 
 from app.ml.model_registry import registry
 from app.ml.skill_taxonomy import SKILL_TAXONOMY, alias_map, display_name
@@ -113,15 +114,25 @@ def _candidate_phrases(text: str, noun_chunks: list[str]) -> list[str]:
     return cleaned[:140]
 
 
+def _matrix(vectors: list[list[float]]) -> np.ndarray:
+    """Stack embeddings into a normalized float32 matrix for fast similarity."""
+    matrix = np.asarray(vectors, dtype=np.float32)
+    if matrix.ndim == 1:
+        matrix = matrix.reshape(1, -1)
+    norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+    norms[norms == 0] = 1.0
+    return matrix / norms
+
+
 def _cosine(a: list[float], b: list[float]) -> float:
-    if not a or not b:
+    if not a or not b or len(a) != len(b):
         return 0.0
-    dot = sum(x * y for x, y in zip(a, b))
-    norm_a = math.sqrt(sum(x * x for x in a))
-    norm_b = math.sqrt(sum(y * y for y in b))
-    if norm_a == 0 or norm_b == 0:
+    va = np.asarray(a, dtype=np.float32)
+    vb = np.asarray(b, dtype=np.float32)
+    denominator = float(np.linalg.norm(va) * np.linalg.norm(vb))
+    if denominator == 0:
         return 0.0
-    return max(-1.0, min(1.0, dot / (norm_a * norm_b)))
+    return float(np.clip(np.dot(va, vb) / denominator, -1.0, 1.0))
 
 
 def _skill_embeddings() -> dict[str, list[float]]:
@@ -144,19 +155,21 @@ def _semantic_details(text: str, already: dict[str, dict[str, Any]], noun_chunks
             return {}
         candidate_vectors = registry.embed(candidates)
         skill_vectors = _skill_embeddings()
+        candidate_matrix = _matrix(candidate_vectors)
+        skill_names = list(skill_vectors)
+        skill_matrix = _matrix([skill_vectors[skill] for skill in skill_names])
+        if candidate_matrix.shape[1] != skill_matrix.shape[1]:
+            return {}
+        similarities = candidate_matrix @ skill_matrix.T
+        best_indices = similarities.argmax(axis=1)
+        best_scores = similarities[np.arange(len(candidates)), best_indices]
     except Exception:  # noqa: BLE001
         return {}
     results: dict[str, dict[str, Any]] = {}
-    for candidate, vector in zip(candidates, candidate_vectors):
-        best_skill = None
-        best_score = 0.0
-        for skill, skill_vector in skill_vectors.items():
-            score = _cosine(vector, skill_vector)
-            if score > best_score:
-                best_score = score
-                best_skill = skill
-        if best_skill is None:
-            continue
+    for candidate, best_index, best_score in zip(
+        candidates, best_indices.tolist(), best_scores.tolist()
+    ):
+        best_skill = skill_names[best_index]
         threshold = 0.82 if len(candidate.split()) > 1 else 0.9
         if best_score < threshold or best_skill in already:
             continue
@@ -173,17 +186,23 @@ def _semantic_details(text: str, already: dict[str, dict[str, Any]], noun_chunks
     return results
 
 
-def extract_skill_details(text: str, *, semantic: bool = True) -> dict[str, Any]:
+def extract_skill_details(
+    text: str,
+    *,
+    semantic: bool = True,
+    spacy_data: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     text = text or ""
     alias_hits = _alias_details(text)
     semantic_hits: dict[str, dict[str, Any]] = {}
     noun_chunks: list[str] = []
     if semantic and text.strip():
-        try:
-            spacy_data = registry.spacy_entities(text)
-            noun_chunks = spacy_data["noun_chunks"]
-        except Exception:  # noqa: BLE001
-            noun_chunks = []
+        if spacy_data is None:
+            try:
+                spacy_data = registry.spacy_entities(text)
+            except Exception:  # noqa: BLE001
+                spacy_data = {}
+        noun_chunks = spacy_data.get("noun_chunks", [])
         semantic_hits = _semantic_details(text, alias_hits, noun_chunks)
     merged = {**semantic_hits, **alias_hits}
     details = sorted(merged.values(), key=lambda item: (-item["confidence"], item["display"]))
@@ -217,18 +236,27 @@ def match_skills(candidate_skills: list[str], required_skills: list[str]) -> dic
     exact = [skill for skill in required if skill in candidate_set]
     remaining = [skill for skill in required if skill not in candidate_set]
 
-    candidate_vectors: dict[str, list[float]] = {}
-    required_vectors: dict[str, list[float]] = {}
+    semantic_best: dict[str, tuple[str | None, float]] = {}
     if remaining and candidate_skills:
         try:
             names = list(dict.fromkeys(list(candidate_set) + remaining))
             vectors = registry.embed([display_name(name) for name in names])
             vector_map = dict(zip(names, vectors))
-            candidate_vectors = {name: vector_map[name] for name in candidate_set}
-            required_vectors = {name: vector_map[name] for name in remaining}
+            candidate_names = [name for name in candidate_set if name in vector_map]
+            required_names = [name for name in remaining if name in vector_map]
+            if candidate_names and required_names:
+                candidate_matrix = _matrix([vector_map[name] for name in candidate_names])
+                required_matrix = _matrix([vector_map[name] for name in required_names])
+                if candidate_matrix.shape[1] == required_matrix.shape[1]:
+                    similarities = required_matrix @ candidate_matrix.T
+                    for requirement, row in zip(required_names, similarities):
+                        best_index = int(row.argmax())
+                        semantic_best[requirement] = (
+                            candidate_names[best_index],
+                            float(row[best_index]),
+                        )
         except Exception:  # noqa: BLE001
-            candidate_vectors = {}
-            required_vectors = {}
+            semantic_best = {}
 
     matched_names: set[str] = set()
     for requirement in required:
@@ -244,15 +272,7 @@ def match_skills(candidate_skills: list[str], required_skills: list[str]) -> dic
             matched_names.add(requirement)
 
     for requirement in remaining:
-        best_name = None
-        best_score = 0.0
-        requirement_vector = required_vectors.get(requirement)
-        if requirement_vector:
-            for candidate in candidate_vectors:
-                score = _cosine(requirement_vector, candidate_vectors[candidate])
-                if score > best_score:
-                    best_score = score
-                    best_name = candidate
+        best_name, best_score = semantic_best.get(requirement, (None, 0.0))
         # Related taxonomy skills also count as partial evidence.
         related_bonus = 0.0
         for candidate in candidate_set:

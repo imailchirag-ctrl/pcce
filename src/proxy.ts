@@ -4,6 +4,10 @@ import { SESSION_COOKIE } from "@/lib/session-constants";
 
 const PROTECTED = [
   "/dashboard",
+  "/career-quest",
+  "/twin",
+  "/market",
+  "/exchange",
   "/resume",
   "/career",
   "/learn",
@@ -18,7 +22,7 @@ const PROTECTED = [
 
 const AUTH_PAGES = ["/auth/login", "/auth/signup", "/auth/signup/recruiter", "/login", "/signup"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get(SESSION_COOKIE)?.value;
 

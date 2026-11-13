@@ -11,6 +11,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app import db
 from app.api.router import api_router
 from app.core.config import get_settings
+from app.errors import DomainError
 
 settings = get_settings()
 logger = logging.getLogger("skillbridge.api")
@@ -79,16 +80,30 @@ async def http_error_handler(
 ) -> JSONResponse:
     del request
     client_error = exc.status_code < 500
-    message = str(exc.detail) if client_error else "The service could not complete the request."
+    if isinstance(exc.detail, dict) and isinstance(exc.detail.get("message"), str):
+        message = exc.detail["message"]
+        code = str(exc.detail.get("code") or ("request_failed" if client_error else "internal_error"))
+    else:
+        message = str(exc.detail) if client_error else "The service could not complete the request."
+        code = "request_failed" if client_error else "internal_error"
     return JSONResponse(
         status_code=exc.status_code,
         headers=exc.headers,
         content={
             "error": {
-                "code": "request_failed" if client_error else "internal_error",
+                "code": code,
                 "message": message,
             }
         },
+    )
+
+
+@app.exception_handler(DomainError)
+async def domain_error_handler(request: Request, exc: DomainError) -> JSONResponse:
+    del request
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": {"code": exc.code, "message": exc.message}},
     )
 
 

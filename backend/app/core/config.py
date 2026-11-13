@@ -39,6 +39,19 @@ class Settings(BaseSettings):
     ollama_timeout_seconds: int = 75
     ollama_num_predict: int = 420
 
+    # Career Quest routes tasks to installed local models, one at a time.
+    career_quest_manager_model: str = "qwen2.5:7b"
+    career_quest_coder_model: str = "qwen2.5-coder:3b"
+    career_quest_fallback_model: str = "gemma2:2b"
+    career_quest_model_timeout_seconds: int = 20
+
+    # Player code is sent only to a separately operated isolated Judge0 service.
+    # No local execution fallback is supported.
+    career_quest_runner_url: str = ""
+    career_quest_runner_token: str = ""
+    career_quest_runner_language_id: int = 71
+    career_quest_runner_timeout_seconds: int = 20
+
     # Optional speech-to-text. Browser speech recognition is the default voice
     # path so no weight download is required for the core interview flow.
     enable_whisper: bool = False

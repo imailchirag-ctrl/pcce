@@ -326,6 +326,23 @@ class ModelRegistry:
         self._ollama_cache = status
         return status
 
+    def ollama_model_status(self, model: str) -> dict[str, Any]:
+        """Check a server-selected model against installed Ollama tags."""
+        status = self.ollama_status()
+        available = bool(status.get("reachable") and model in status.get("models", []))
+        error = None
+        if not status.get("reachable"):
+            error = status.get("error") or "Ollama is unavailable."
+        elif not available:
+            error = f"{model} is not installed in Ollama."
+        return {
+            "configured": bool(settings.enable_llm and settings.ollama_base_url),
+            "reachable": bool(status.get("reachable")),
+            "model": model,
+            "available": available,
+            "error": error,
+        }
+
     def generate_json(
         self,
         prompt: str,
@@ -334,8 +351,10 @@ class ModelRegistry:
         model: str | None = None,
         timeout: int | None = None,
         num_predict: int | None = None,
+        keep_alive: str | int | None = None,
     ) -> dict[str, Any]:
-        status = self.ollama_status()
+        selected_model = model or settings.ollama_model
+        status = self.ollama_model_status(selected_model)
         if not status.get("available"):
             return {
                 "ok": False,
@@ -345,7 +364,6 @@ class ModelRegistry:
                 "error": status.get("error") or "Ollama is unavailable.",
                 "elapsed_ms": 0,
             }
-        selected_model = model or settings.ollama_model
         started = time.perf_counter()
         payload = {
             "model": selected_model,
@@ -361,6 +379,8 @@ class ModelRegistry:
                 "num_ctx": 4096,
             },
         }
+        if keep_alive is not None:
+            payload["keep_alive"] = keep_alive
         request = urllib.request.Request(
             f"{settings.ollama_base_url.rstrip('/')}/api/chat",
             data=json.dumps(payload).encode("utf-8"),

@@ -169,13 +169,19 @@ def extract_education(sections: dict[str, list[str]]) -> dict[str, Any]:
     }
 
 
-def extract_experience(sections: dict[str, list[str]], text: str) -> dict[str, Any]:
+def extract_experience(
+    sections: dict[str, list[str]],
+    text: str,
+    entities: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     lines = sections.get("experience", [])
     date_ranges = DATE_RANGE_PATTERN.findall("\n".join(lines) or text)
     titles = [line for line in lines if JOB_TITLE_PATTERN.search(line) and len(line) <= 140]
+    if entities is None:
+        entities = _safe_ner(text)
     companies = [
         entity["text"]
-        for entity in _safe_ner(text)
+        for entity in entities
         if entity["label"] == "ORG" and 2 <= len(entity["text"]) <= 60
     ]
     return {
@@ -198,11 +204,15 @@ def extract_certifications(sections: dict[str, list[str]]) -> dict[str, Any]:
     return {"lines": _clean_lines(lines, 8), "present": bool(lines)}
 
 
-def _safe_ner(text: str) -> list[dict[str, Any]]:
+def _safe_spacy(text: str) -> dict[str, Any]:
     try:
-        return registry.spacy_entities(text)["entities"]
+        return registry.spacy_entities(text)
     except Exception:  # noqa: BLE001
-        return []
+        return {"entities": [], "noun_chunks": []}
+
+
+def _safe_ner(text: str) -> list[dict[str, Any]]:
+    return _safe_spacy(text)["entities"]
 
 
 def ats_checks(text: str, sections: dict[str, list[str]], contact: dict[str, Any]) -> dict[str, Any]:
@@ -303,8 +313,9 @@ def analyze_resume(
     text = text.strip()
     sections = split_sections(text)
     contact = extract_contact(text)
-    ner = _safe_ner(text)
-    skills_data = extract_skill_details(text, semantic=True)
+    spacy_data = _safe_spacy(text)
+    ner = spacy_data["entities"]
+    skills_data = extract_skill_details(text, semantic=True, spacy_data=spacy_data)
     detected = skills_data["names"]
     role = role_profile(target_role)
 
@@ -316,7 +327,7 @@ def analyze_resume(
         required = list(dict.fromkeys(required + jd_skills))
 
     match = match_skills(detected, required)
-    experience = extract_experience(sections, text)
+    experience = extract_experience(sections, text, ner)
     education = extract_education(sections)
     projects = extract_projects(sections)
     certifications = extract_certifications(sections)

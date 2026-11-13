@@ -16,6 +16,10 @@ import { RecruiterOverviewPage } from "./pages/recruiter-overview";
 import { RecruiterJobsPage } from "./pages/recruiter-jobs";
 import { RecruiterCandidatesPage } from "./pages/recruiter-candidates";
 import { RecruiterPipelinePage } from "./pages/recruiter-pipeline";
+import { CareerQuestPage } from "./pages/career-quest";
+import { DigitalTwinPage } from "./pages/digital-twin";
+import { MarketIntelPage } from "./pages/market-intel";
+import { SkillExchangePage } from "./pages/skill-exchange";
 
 export type WorkspaceMode =
   | "dashboard"
@@ -33,9 +37,13 @@ export type WorkspaceMode =
   | "recruiter"
   | "recruiterJobs"
   | "candidates"
-  | "pipeline";
+  | "pipeline"
+  | "careerQuest"
+  | "digitalTwin"
+  | "marketIntel"
+  | "skillExchange";
 
-const PAGE_MAP: Record<WorkspaceMode, React.ComponentType<any>> = {
+const PAGE_MAP: Record<WorkspaceMode, React.ComponentType> = {
   dashboard: DashboardPage,
   resume: ResumePage,
   career: CareerPage,
@@ -52,6 +60,10 @@ const PAGE_MAP: Record<WorkspaceMode, React.ComponentType<any>> = {
   recruiterJobs: RecruiterJobsPage,
   candidates: RecruiterCandidatesPage,
   pipeline: RecruiterPipelinePage,
+  careerQuest: CareerQuestPage,
+  digitalTwin: DigitalTwinPage,
+  marketIntel: MarketIntelPage,
+  skillExchange: SkillExchangePage,
 };
 
 export function WorkspacePage({ mode }: { mode: WorkspaceMode }) {

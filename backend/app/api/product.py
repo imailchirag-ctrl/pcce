@@ -20,6 +20,7 @@ from app.ml.roadmap_generator import generate_roadmap
 from app.ml.skill_extractor import extract_skill_details, match_skills, semantic_similarity
 from app.ml.skill_taxonomy import ROLE_CATALOG, role_profile
 from app.realtime import hub
+from app.services import digital_twin
 from app.services.document import DocumentError, extract_text, safe_filename
 
 router = APIRouter()
@@ -201,6 +202,7 @@ def _analyze_and_store(
 ) -> dict[str, Any]:
     analysis = analyze_resume(text, target_role, job_description)
     resume_id = db.save_resume(user_id, filename, mime_type, text, analysis)
+    digital_twin.refresh_quietly(user_id, "resume_upload")
     return {"resume_id": resume_id, "analysis": analysis, "text_preview": text[:1200]}
 
 
@@ -595,6 +597,7 @@ async def learning_roadmap_toggle(
     roadmap = db.toggle_roadmap_item(user["id"], item_id, payload.completed)
     if roadmap is None:
         raise HTTPException(404, "Generate a roadmap before updating progress.")
+    digital_twin.refresh_quietly(user["id"], "learning_milestone")
     hub.publish(user["id"], "roadmap", {"item_id": item_id})
     hub.publish(user["id"], "dashboard", {})
     return {"roadmap": roadmap}

@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from app.services import digital_twin
 from app import db
 from app.core.config import get_settings
 from app.deps import current_user, optional_user
@@ -148,6 +149,7 @@ async def update_profile(
     if values.get("name") is not None and not values["name"].strip():
         raise HTTPException(422, "Your name cannot be empty.")
     updated = db.update_user(user["id"], **values)
+    digital_twin.refresh_quietly(user["id"], "profile_update")
     db.log_event(user["id"], "profile", "Profile updated", "Your profile details are now up to date.")
     hub.publish(user["id"], "profile", {"reason": "updated"})
     return {"user": updated}
