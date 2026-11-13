@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard - SkillBridge</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/style.css"></head><body data-auth="1"><div id="nav"></div><main><div class="page-head"><div><h1 id="hi"></h1><p id="tg"></p></div><span class="sp"></span><a class="btn lg" href="interview.html">Start mock interview</a></div>
+<div class="g4" id="stats"></div>
+<div class="g2" style="margin-top:24px"><div class="card"><h2>Skill coverage</h2><p class="muted">Skills required for your target role.</p><div id="skills"></div></div>
+<div class="card"><h2>Your journey</h2><p class="muted">Complete each step to unlock jobs.</p><ul class="steps" id="journey"></ul></div></div>
+<div class="card" style="margin-top:24px"><div class="row"><h2 style="margin:0">Recent interviews</h2><span class="sp"></span><a href="interview.html">New session</a></div><div id="hist"></div></div></main><script src="js/data.js"></script><script src="js/app.js"></script><script>
+const u=DB.user,a=analyse(u),s=overall(u),req=ROLES[u.role]||[];
+hi.textContent="Welcome back, "+u.name.split(" ")[0];tg.textContent="Target: "+u.role+(u.dream?" at "+u.dream:"");
+const st=(k,v,d)=>`<div class="card stat"><span class="k">${k}</span><span class="v">${v}</span><span class="d">${d}</span></div>`;
+stats.innerHTML=`<div class="card" style="display:grid;place-items:center">${ring(s,150)}<span class="muted" style="margin-top:8px;font-weight:600">Readiness</span></div>`+
+ st("Skill match",u.skillScore||0,(req.length-a.missing.length)+" of "+req.length+" skills")+
+ st("Interview score",u.interviewScore??"–",u.interviewScore==null?"Not taken yet":"Latest session")+
+ st("Open gaps",a.missing.length,s>=70?"You can apply to jobs":"Reach 70 to unlock jobs");
+skills.innerHTML=req.map(k=>{const h=a.have.includes(k);return`<div class="meter" style="grid-template-columns:1fr 120px 70px"><span style="font-weight:600">${esc(k)}</span><div class="bar"><i style="width:${h?100:8}%;${h?"":"background:var(--amber)"}"></i></div><span class="tag ${h?"":"miss"}" style="margin:0;text-align:center">${h?"Have":"Missing"}</span></div>`}).join("");
+const hist=u.interviews||[],S=[["Upload your resume",!!u.resumeText,"resume.html"],["Review career insights",!!u.resumeText,"career.html"],["Close gaps with courses",a.missing.length==0&&!!u.resumeText,"education.html"],["Complete a mock interview",u.interviewScore!=null,"interview.html"],["Reach 70 and apply",s>=70,"jobs.html"]];
+journey.innerHTML=S.map((x,i)=>`<li><span class="dot ${x[1]?"done":""}">${x[1]?"&#10003;":i+1}</span><a href="${x[2]}" style="color:inherit;font-weight:600;text-decoration:none">${x[0]}</a></li>`).join("");
+document.getElementById("hist").innerHTML=hist.length?hist.slice(0,5).map(h=>`<div class="row" style="padding:16px 0;border-bottom:1px solid var(--line)"><div><b>${esc(h.role)}</b><div class="muted" style="font-size:.88rem">${new Date(h.date).toLocaleString()} &middot; ${h.count} questions</div></div><span class="sp"></span><span class="pill ${grade(h.score)}">${h.score}/100</span></div>`).join(""):`<div class="empty">No interviews yet. Your voice sessions and scores will appear here.</div>`;
+</script></body></html>
