@@ -1,0 +1,27 @@
+node_modules/
+.next/
+out/
+build/
+coverage/
+dist/
+
+.env
+.env.*
+!.env.example
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Model weights, local databases, uploaded resumes, and generated audio
+backend/models/
+backend/data/
+backend/uploads/
+*.gguf
+*.safetensors
+*.pt
+*.pth
+*.onnx
+
+src/generated/prisma/
