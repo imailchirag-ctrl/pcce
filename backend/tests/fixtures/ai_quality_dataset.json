@@ -1,0 +1,58 @@
+{
+  "resumes": [
+    {
+      "id": "frontend_early_career",
+      "text": "Mira Sen\nmira@example.test\nSUMMARY\nFrontend developer building accessible product interfaces.\nSKILLS\nReact, TypeScript, JavaScript, CSS, Git, REST APIs, accessibility\nEXPERIENCE\nBuilt a responsive dashboard in React and TypeScript.",
+      "expected_skills": ["react", "typescript", "javascript", "css", "git", "rest apis", "accessibility"],
+      "target_job": "frontend_engineer"
+    },
+    {
+      "id": "data_analyst_transition",
+      "text": "Dev Patel\nSUMMARY\nAnalyst moving into product analytics.\nSKILLS\nPython, SQL, pandas, statistics, data visualization\nPROJECTS\nAnalyzed synthetic service data with Python and pandas.",
+      "expected_skills": ["python", "sql", "pandas", "statistics", "data visualization"],
+      "target_job": "data_analyst"
+    },
+    {
+      "id": "new_graduate",
+      "text": "Asha Thomas\nEDUCATION\nBSc Computer Science\nSKILLS\nJava, HTML, CSS, Git\nPROJECTS\nCreated a class project website and used Git for version control.",
+      "expected_skills": ["java", "html", "css", "git"],
+      "target_job": "junior_backend"
+    },
+    {
+      "id": "security_engineer",
+      "text": "Noor Iqbal\nSKILLS\nPython, Linux, cybersecurity, OWASP, threat modeling, network security\nPROJECTS\nWrote Python scripts to review Linux audit logs and document threat models.",
+      "expected_skills": ["python", "linux", "cybersecurity", "owasp", "threat modeling", "network security"],
+      "target_job": "security_analyst"
+    }
+  ],
+  "jobs": [
+    {
+      "id": "frontend_engineer",
+      "title": "Frontend Engineer",
+      "description": "Build accessible React and TypeScript interfaces. Use JavaScript, CSS, Git, REST APIs, and automated testing.",
+      "required_skills": ["react", "typescript", "javascript", "accessibility", "testing", "git", "rest apis"],
+      "tags": ["React", "TypeScript"]
+    },
+    {
+      "id": "data_analyst",
+      "title": "Data Analyst",
+      "description": "Use SQL and Python with pandas to analyze data, apply statistics, and present data visualizations.",
+      "required_skills": ["sql", "python", "pandas", "statistics", "data visualization", "communication"],
+      "tags": ["SQL", "Python"]
+    },
+    {
+      "id": "junior_backend",
+      "title": "Junior Backend Developer",
+      "description": "Build Java services with Spring Boot, SQL databases, Git, and Docker.",
+      "required_skills": ["java", "spring boot", "sql", "git", "docker"],
+      "tags": ["Java", "Backend"]
+    },
+    {
+      "id": "security_analyst",
+      "title": "Security Analyst",
+      "description": "Review Linux systems, use Python, follow OWASP guidance, assess network security, and document threat models.",
+      "required_skills": ["linux", "python", "cybersecurity", "owasp", "network security", "threat modeling", "incident response"],
+      "tags": ["Security", "Linux"]
+    }
+  ]
+}

@@ -112,6 +112,62 @@ CREATE TABLE IF NOT EXISTS interview_answers (
   evaluation_json TEXT NOT NULL,
   created_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE,
+  password_hash TEXT,
+  name TEXT NOT NULL,
+  avatar_url TEXT,
+  provider TEXT NOT NULL DEFAULT 'password',
+  role TEXT NOT NULL DEFAULT 'candidate',
+  email_verified INTEGER NOT NULL DEFAULT 0,
+  headline TEXT,
+  location TEXT,
+  phone TEXT,
+  bio TEXT,
+  website TEXT,
+  linkedin TEXT,
+  github TEXT,
+  company TEXT,
+  job_title TEXT,
+  years_experience INTEGER,
+  target_role TEXT,
+  open_to_work INTEGER NOT NULL DEFAULT 1,
+  onboarded INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS sessions (
+  token_hash TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  user_agent TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+
+CREATE TABLE IF NOT EXISTS events (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  title TEXT NOT NULL,
+  detail TEXT,
+  meta_json TEXT,
+  read INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_events_user ON events(user_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS roadmaps (
+  user_id TEXT PRIMARY KEY,
+  target_role TEXT,
+  result_json TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
 """
 
 SEED_JOBS: list[dict[str, Any]] = [
@@ -237,6 +293,22 @@ def connection() -> Iterator[sqlite3.Connection]:
         conn.close()
 
 
+def _migrate(conn: sqlite3.Connection) -> None:
+    """Add columns introduced after the first local database was created."""
+    jobs_columns = {row["name"] for row in conn.execute("PRAGMA table_info(jobs)").fetchall()}
+    if "recruiter_id" not in jobs_columns:
+        conn.execute("ALTER TABLE jobs ADD COLUMN recruiter_id TEXT")
+    if "status" not in jobs_columns:
+        conn.execute("ALTER TABLE jobs ADD COLUMN status TEXT DEFAULT 'PUBLISHED'")
+    if "created_by_name" not in jobs_columns:
+        conn.execute("ALTER TABLE jobs ADD COLUMN created_by_name TEXT")
+    applications_columns = {
+        row["name"] for row in conn.execute("PRAGMA table_info(applications)").fetchall()
+    }
+    if "updated_at" not in applications_columns:
+        conn.execute("ALTER TABLE applications ADD COLUMN updated_at TEXT")
+
+
 def init_db() -> None:
     global _initialized
     with _lock:
@@ -244,14 +316,16 @@ def init_db() -> None:
             return
         with connection() as conn:
             conn.executescript(SCHEMA)
+            _migrate(conn)
             count = conn.execute("SELECT COUNT(*) AS count FROM jobs").fetchone()["count"]
             if not count:
                 for job in SEED_JOBS:
                     conn.execute(
                         """
                         INSERT INTO jobs (id, title, company, location, employment_type, salary,
-                                          description, required_skills_json, tags_json, posted, created_at)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                          description, required_skills_json, tags_json, posted, created_at,
+                                          status, created_by_name)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PUBLISHED', ?)
                         """,
                         (
                             job["id"],
@@ -265,12 +339,14 @@ def init_db() -> None:
                             json.dumps(job["tags"]),
                             job["posted"],
                             utcnow(),
+                            job["company"],
                         ),
                     )
         _initialized = True
 
 
 def _row_to_job(row: sqlite3.Row) -> dict[str, Any]:
+    keys = set(row.keys())
     return {
         "id": row["id"],
         "title": row["title"],
@@ -282,13 +358,31 @@ def _row_to_job(row: sqlite3.Row) -> dict[str, Any]:
         "required_skills": json.loads(row["required_skills_json"]),
         "tags": json.loads(row["tags_json"]),
         "posted": row["posted"],
+        "recruiter_id": row["recruiter_id"] if "recruiter_id" in keys else None,
+        "status": (row["status"] if "status" in keys else None) or "PUBLISHED",
+        "created_by_name": row["created_by_name"] if "created_by_name" in keys else row["company"],
     }
 
 
-def list_jobs() -> list[dict[str, Any]]:
+def list_jobs(published_only: bool = True) -> list[dict[str, Any]]:
     init_db()
     with connection() as conn:
-        rows = conn.execute("SELECT * FROM jobs ORDER BY created_at ASC").fetchall()
+        if published_only:
+            rows = conn.execute(
+                "SELECT * FROM jobs WHERE COALESCE(status, 'PUBLISHED') = 'PUBLISHED' "
+                "ORDER BY created_at DESC"
+            ).fetchall()
+        else:
+            rows = conn.execute("SELECT * FROM jobs ORDER BY created_at DESC").fetchall()
+    return [_row_to_job(row) for row in rows]
+
+
+def list_recruiter_jobs(recruiter_id: str) -> list[dict[str, Any]]:
+    init_db()
+    with connection() as conn:
+        rows = conn.execute(
+            "SELECT * FROM jobs WHERE recruiter_id = ? ORDER BY created_at DESC", (recruiter_id,)
+        ).fetchall()
     return [_row_to_job(row) for row in rows]
 
 
@@ -306,8 +400,9 @@ def create_job(job: dict[str, Any]) -> dict[str, Any]:
         conn.execute(
             """
             INSERT OR REPLACE INTO jobs (id, title, company, location, employment_type, salary,
-                                         description, required_skills_json, tags_json, posted, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                         description, required_skills_json, tags_json, posted, created_at,
+                                         recruiter_id, status, created_by_name)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 job_id,
@@ -321,11 +416,24 @@ def create_job(job: dict[str, Any]) -> dict[str, Any]:
                 json.dumps(job.get("tags", [])),
                 "Just now",
                 utcnow(),
+                job.get("recruiter_id"),
+                job.get("status", "PUBLISHED"),
+                job.get("created_by_name") or job.get("company", "SkillBridge Partner"),
             ),
         )
     stored = get_job(job_id)
     assert stored is not None
     return stored
+
+
+def update_job_status(job_id: str, recruiter_id: str, status: str) -> dict[str, Any] | None:
+    init_db()
+    with connection() as conn:
+        conn.execute(
+            "UPDATE jobs SET status = ? WHERE id = ? AND recruiter_id = ?",
+            (status, job_id, recruiter_id),
+        )
+    return get_job(job_id)
 
 
 def save_resume(
@@ -544,3 +652,423 @@ def interview_history(user_id: str) -> list[dict[str, Any]]:
             (user_id,),
         ).fetchall()
     return [dict(row) for row in rows]
+
+
+# ---------------------------------------------------------------------------
+# Identity, sessions, and activity
+# ---------------------------------------------------------------------------
+ROLE_VALUES = {"candidate", "recruiter"}
+
+
+def _user_public(row: sqlite3.Row | dict[str, Any]) -> dict[str, Any]:
+    data = dict(row)
+    data.pop("password_hash", None)
+    data["open_to_work"] = bool(data.get("open_to_work", 1))
+    data["onboarded"] = bool(data.get("onboarded", 0))
+    data["email_verified"] = bool(data.get("email_verified", 0))
+    return data
+
+
+def create_user(
+    *,
+    email: str,
+    name: str,
+    password_hash: str | None,
+    role: str = "candidate",
+    provider: str = "password",
+    avatar_url: str | None = None,
+    company: str | None = None,
+    email_verified: bool = False,
+) -> dict[str, Any]:
+    init_db()
+    role = role if role in ROLE_VALUES else "candidate"
+    user_id = f"usr-{uuid.uuid4().hex[:16]}"
+    now = utcnow()
+    with connection() as conn:
+        conn.execute(
+            """
+            INSERT INTO users (id, email, password_hash, name, avatar_url, provider, role,
+                               email_verified, company, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                user_id,
+                email.lower().strip(),
+                password_hash,
+                name.strip()[:120],
+                avatar_url,
+                provider,
+                role,
+                1 if email_verified else 0,
+                company,
+                now,
+                now,
+            ),
+        )
+    stored = get_user(user_id)
+    assert stored is not None
+    return stored
+
+
+def get_user(user_id: str) -> dict[str, Any] | None:
+    init_db()
+    with connection() as conn:
+        row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    return _user_public(row) if row else None
+
+
+def get_user_record(user_id: str) -> dict[str, Any] | None:
+    init_db()
+    with connection() as conn:
+        row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def get_user_by_email(email: str) -> dict[str, Any] | None:
+    init_db()
+    with connection() as conn:
+        row = conn.execute("SELECT * FROM users WHERE lower(email) = lower(?)", (email.strip(),)).fetchone()
+    return dict(row) if row else None
+
+
+def update_user(user_id: str, **values: Any) -> dict[str, Any]:
+    init_db()
+    allowed = {
+        "name", "avatar_url", "role", "headline", "location", "phone", "bio",
+        "website", "linkedin", "github", "company", "job_title", "years_experience",
+        "target_role", "open_to_work", "onboarded", "email_verified", "password_hash",
+    }
+    fields = {key: value for key, value in values.items() if key in allowed}
+    if not fields:
+        return get_user(user_id) or {}
+    assignments = ", ".join(f"{key} = ?" for key in fields)
+    with connection() as conn:
+        conn.execute(
+            f"UPDATE users SET {assignments}, updated_at = ? WHERE id = ?",
+            (*fields.values(), utcnow(), user_id),
+        )
+    stored = get_user(user_id)
+    assert stored is not None
+    return stored
+
+
+def create_session(user_id: str, token_hash: str, expires_at: str, user_agent: str | None = None) -> None:
+    init_db()
+    with connection() as conn:
+        conn.execute(
+            "INSERT INTO sessions (token_hash, user_id, created_at, expires_at, user_agent) VALUES (?, ?, ?, ?, ?)",
+            (token_hash, user_id, utcnow(), expires_at, (user_agent or "")[:300] or None),
+        )
+
+
+def get_session_user(token_hash: str) -> dict[str, Any] | None:
+    init_db()
+    with connection() as conn:
+        row = conn.execute(
+            "SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id "
+            "WHERE s.token_hash = ? AND s.expires_at > ?",
+            (token_hash, utcnow()),
+        ).fetchone()
+    return _user_public(row) if row else None
+
+
+def delete_session(token_hash: str) -> None:
+    init_db()
+    with connection() as conn:
+        conn.execute("DELETE FROM sessions WHERE token_hash = ?", (token_hash,))
+
+
+def delete_user_sessions(user_id: str, keep: str | None = None) -> None:
+    init_db()
+    with connection() as conn:
+        if keep:
+            conn.execute("DELETE FROM sessions WHERE user_id = ? AND token_hash != ?", (user_id, keep))
+        else:
+            conn.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
+
+
+def purge_expired_sessions() -> None:
+    init_db()
+    with connection() as conn:
+        conn.execute("DELETE FROM sessions WHERE expires_at <= ?", (utcnow(),))
+
+
+# ---------------------------------------------------------------------------
+# Activity feed / notifications
+# ---------------------------------------------------------------------------
+def log_event(
+    user_id: str,
+    kind: str,
+    title: str,
+    detail: str | None = None,
+    meta: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    init_db()
+    event_id = f"evt-{uuid.uuid4().hex[:12]}"
+    with connection() as conn:
+        conn.execute(
+            "INSERT INTO events (id, user_id, kind, title, detail, meta_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (event_id, user_id, kind[:40], title[:180], (detail or "")[:400] or None, json.dumps(meta or {}), utcnow()),
+        )
+    return {
+        "id": event_id,
+        "kind": kind,
+        "title": title,
+        "detail": detail,
+        "read": False,
+        "created_at": utcnow(),
+        "meta": meta or {},
+    }
+
+
+def list_events(user_id: str, limit: int = 25) -> list[dict[str, Any]]:
+    init_db()
+    with connection() as conn:
+        rows = conn.execute(
+            "SELECT * FROM events WHERE user_id = ? ORDER BY created_at DESC LIMIT ?",
+            (user_id, limit),
+        ).fetchall()
+    return [
+        {
+            "id": row["id"],
+            "kind": row["kind"],
+            "title": row["title"],
+            "detail": row["detail"],
+            "read": bool(row["read"]),
+            "created_at": row["created_at"],
+            "meta": json.loads(row["meta_json"] or "{}"),
+        }
+        for row in rows
+    ]
+
+
+def mark_events_read(user_id: str) -> int:
+    init_db()
+    with connection() as conn:
+        cursor = conn.execute("UPDATE events SET read = 1 WHERE user_id = ? AND read = 0", (user_id,))
+    return cursor.rowcount
+
+
+# ---------------------------------------------------------------------------
+# Learning roadmap persistence
+# ---------------------------------------------------------------------------
+def save_roadmap(user_id: str, target_role: str, roadmap: dict[str, Any]) -> dict[str, Any]:
+    init_db()
+    now = utcnow()
+    with connection() as conn:
+        conn.execute(
+            "INSERT INTO roadmaps (user_id, target_role, result_json, created_at, updated_at) "
+            "VALUES (?, ?, ?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET "
+            "target_role=excluded.target_role, result_json=excluded.result_json, updated_at=excluded.updated_at",
+            (user_id, target_role, json.dumps(roadmap), now, now),
+        )
+    return roadmap
+
+
+def get_roadmap(user_id: str) -> dict[str, Any] | None:
+    init_db()
+    with connection() as conn:
+        row = conn.execute("SELECT result_json FROM roadmaps WHERE user_id = ?", (user_id,)).fetchone()
+    return json.loads(row["result_json"]) if row else None
+
+
+def toggle_roadmap_item(user_id: str, item_id: str, completed: bool) -> dict[str, Any] | None:
+    roadmap = get_roadmap(user_id)
+    if not roadmap:
+        return None
+    for item in roadmap.get("items", []):
+        if item.get("id") == item_id:
+            item["completed"] = completed
+    save_roadmap(user_id, roadmap.get("target_role", ""), roadmap)
+    return roadmap
+
+
+# ---------------------------------------------------------------------------
+# Recruiter directory and dashboards
+# ---------------------------------------------------------------------------
+def list_candidates(query: str = "", limit: int = 40) -> list[dict[str, Any]]:
+    init_db()
+    like = f"%{query.strip().lower()}%"
+    with connection() as conn:
+        rows = conn.execute(
+            "SELECT * FROM users WHERE role = 'candidate' AND (lower(name) LIKE ? OR lower(headline) LIKE ? "
+            "OR lower(target_role) LIKE ? OR lower(location) LIKE ?) ORDER BY updated_at DESC LIMIT ?",
+            (like, like, like, like, limit),
+        ).fetchall()
+    candidates = []
+    for row in rows:
+        user = _user_public(row)
+        analysis = latest_analysis(user["id"])
+        latest = latest_resume(user["id"])
+        candidates.append(
+            {
+                **user,
+                "skills": (analysis or {}).get("skill_names", [])[:8],
+                "readiness": (analysis or {}).get("readiness", {}).get("score"),
+                "experience_years": (analysis or {}).get("experience", {}).get("years")
+                or user.get("years_experience"),
+                "resume": {
+                    "id": (latest or {}).get("id"),
+                    "filename": (latest or {}).get("filename"),
+                    "created_at": (latest or {}).get("created_at"),
+                }
+                if latest
+                else None,
+                "summary": (analysis or {}).get("profile", {}).get("summary") or user.get("bio"),
+            }
+        )
+    return candidates
+
+
+def recruiter_overview(recruiter_id: str) -> dict[str, Any]:
+    init_db()
+    with connection() as conn:
+        jobs = conn.execute(
+            "SELECT id, title, status, created_at FROM jobs WHERE recruiter_id = ? ORDER BY created_at DESC",
+            (recruiter_id,),
+        ).fetchall()
+        job_ids = [row["id"] for row in jobs]
+        pipeline: list[sqlite3.Row] = []
+        if job_ids:
+            placeholders = ",".join("?" for _ in job_ids)
+            pipeline = conn.execute(
+                f"SELECT a.status, COUNT(*) AS count FROM applications a WHERE a.job_id IN ({placeholders}) "
+                "GROUP BY a.status",
+                tuple(job_ids),
+            ).fetchall()
+        applicants = conn.execute(
+            f"SELECT COUNT(*) AS count FROM applications a JOIN jobs j ON j.id = a.job_id WHERE j.recruiter_id = ?",
+            (recruiter_id,),
+        ).fetchone()["count"]
+    return {
+        "jobs": [
+            {**dict(row), "status": dict(row)["status"] or "PUBLISHED"} for row in jobs
+        ],
+        "pipeline": {row["status"]: row["count"] for row in pipeline},
+        "applicants": applicants,
+        "candidates": 0,
+    }
+
+
+def recruiter_applications(recruiter_id: str) -> list[dict[str, Any]]:
+    init_db()
+    with connection() as conn:
+        rows = conn.execute(
+            "SELECT a.id, a.status, a.created_at, j.id AS job_id, j.title AS job_title, "
+            "u.id AS candidate_id, u.name AS candidate_name, u.email AS candidate_email, "
+            "u.headline, u.location, u.avatar_url "
+            "FROM applications a JOIN jobs j ON j.id = a.job_id JOIN users u ON u.id = a.user_id "
+            "WHERE j.recruiter_id = ? ORDER BY a.created_at DESC LIMIT 200",
+            (recruiter_id,),
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def update_application_status(application_id: str, recruiter_id: str, status: str) -> dict[str, Any] | None:
+    init_db()
+    allowed = {"APPLIED", "REVIEWING", "SHORTLISTED", "INTERVIEW", "OFFER", "REJECTED", "WITHDRAWN"}
+    if status not in allowed:
+        return None
+    with connection() as conn:
+        row = conn.execute(
+            "SELECT a.id FROM applications a JOIN jobs j ON j.id = a.job_id "
+            "WHERE a.id = ? AND j.recruiter_id = ?",
+            (application_id, recruiter_id),
+        ).fetchone()
+        if not row:
+            return None
+        conn.execute(
+            "UPDATE applications SET status = ?, updated_at = ? WHERE id = ?",
+            (status, utcnow(), application_id),
+        )
+        updated = conn.execute("SELECT * FROM applications WHERE id = ?", (application_id,)).fetchone()
+    return dict(updated) if updated else None
+
+
+def public_stats() -> dict[str, Any]:
+    init_db()
+    with connection() as conn:
+        candidates = conn.execute("SELECT COUNT(*) AS count FROM users WHERE role = 'candidate'").fetchone()["count"]
+        recruiters = conn.execute("SELECT COUNT(*) AS count FROM users WHERE role = 'recruiter'").fetchone()["count"]
+        resumes = conn.execute("SELECT COUNT(*) AS count FROM resumes").fetchone()["count"]
+        analyses = conn.execute("SELECT COUNT(*) AS count FROM analyses").fetchone()["count"]
+        interviews = conn.execute("SELECT COUNT(*) AS count FROM interview_sessions").fetchone()["count"]
+        completed = conn.execute(
+            "SELECT COUNT(*) AS count FROM interview_sessions WHERE status = 'COMPLETED'"
+        ).fetchone()["count"]
+        jobs = conn.execute(
+            "SELECT COUNT(*) AS count FROM jobs WHERE COALESCE(status, 'PUBLISHED') = 'PUBLISHED'"
+        ).fetchone()["count"]
+        applications = conn.execute("SELECT COUNT(*) AS count FROM applications").fetchone()["count"]
+    return {
+        "candidates": candidates,
+        "recruiters": recruiters,
+        "resumes_analyzed": resumes,
+        "analyses": analyses,
+        "interviews": interviews,
+        "interviews_completed": completed,
+        "jobs": jobs,
+        "applications": applications,
+    }
+
+
+def list_analyses(user_id: str, limit: int = 24) -> list[dict[str, Any]]:
+    init_db()
+    with connection() as conn:
+        rows = conn.execute(
+            "SELECT target_role, result_json, created_at FROM analyses WHERE user_id = ? "
+            "ORDER BY created_at DESC LIMIT ?",
+            (user_id, limit),
+        ).fetchall()
+    results = []
+    for row in rows:
+        analysis = json.loads(row["result_json"])
+        results.append(
+            {
+                "target_role": row["target_role"] or analysis.get("target_role"),
+                "readiness": analysis.get("readiness", {}).get("score"),
+                "weighted_match": analysis.get("weighted_match_percent"),
+                "created_at": row["created_at"],
+            }
+        )
+    return results
+
+
+def delete_resume(user_id: str, resume_id: str) -> bool:
+    init_db()
+    with connection() as conn:
+        cursor = conn.execute("DELETE FROM resumes WHERE id = ? AND user_id = ?", (resume_id, user_id))
+    return cursor.rowcount > 0
+
+
+def application_status_counts(user_id: str) -> dict[str, int]:
+    init_db()
+    with connection() as conn:
+        rows = conn.execute(
+            "SELECT status, COUNT(*) AS count FROM applications WHERE user_id = ? GROUP BY status",
+            (user_id,),
+        ).fetchall()
+    return {row["status"]: row["count"] for row in rows}
+
+
+def saved_job_count(user_id: str) -> int:
+    init_db()
+    with connection() as conn:
+        return conn.execute(
+            "SELECT COUNT(*) AS count FROM saved_jobs WHERE user_id = ?", (user_id,)
+        ).fetchone()["count"]
+
+
+def roadmaps_count(user_id: str) -> int:
+    init_db()
+    with connection() as conn:
+        return conn.execute(
+            "SELECT COUNT(*) AS count FROM roadmaps WHERE user_id = ?", (user_id,)
+        ).fetchone()["count"]
+
+
+def get_application(application_id: str) -> dict[str, Any] | None:
+    init_db()
+    with connection() as conn:
+        row = conn.execute("SELECT * FROM applications WHERE id = ?", (application_id,)).fetchone()
+    return dict(row) if row else None

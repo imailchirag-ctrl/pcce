@@ -46,6 +46,10 @@ class Settings(BaseSettings):
 
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
+    # Shared secret for trusted server-to-server calls from Next.js (for example
+    # the Google OAuth callback). Set the same value in the root .env.
+    internal_api_secret: str = ""
+
     model_config = SettingsConfigDict(
         env_file=(BACKEND_DIR / ".env", PROJECT_DIR / ".env.local", PROJECT_DIR / ".env"),
         env_file_encoding="utf-8",
