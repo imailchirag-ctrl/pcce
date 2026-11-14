@@ -306,4 +306,319 @@ async def exchange_task_add(project_id: str, payload: TaskPayload, user: dict[st
 
 @router.patch("/exchange/projects/{project_id}/tasks/{task_id}", tags=["exchange"])
 async def exchange_task_update(project_id: str, task_id: str, payload: TaskUpdatePayload, user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
-    return skill_exchange.update_task(user["id"], project_id, task_id, payload.model_dump(exclude_unset=True))
+
+    return skill_exchange.update_task(user[id], project_id, task_id, payload.model_dump(exclude_unset=True))
+class StrategyRequest(BaseModel):
+    target_role: str = Field(default="", max_length=120)
+    include_market: bool = Field(default=True, description="Include market demand comparison")
+
+class StrategyResponse(BaseModel):
+    role: str
+    role_title: str
+    alignment: float
+    demonstrated_skills: list[dict[str, Any]]
+    unverified_skills: list[dict[str, Any]]
+    critical_gaps: list[dict[str, Any]]
+    market_demand: list[dict[str, Any]]
+    recommended_actions: list[dict[str, Any]]
+
+class SprintTask(BaseModel):
+    id: str
+    title: str
+    explanation: str
+    skill: str
+    why: str
+    duration: str
+    priority: str
+    module: str
+    action_url: str | None = None
+
+class SprintPlan(BaseModel):
+    role: str
+    generated_at: str
+    tasks: list[SprintTask]
+    total_duration: str
+
+class NextActionResponse(BaseModel):
+    action: str
+    title: str
+    explanation: str
+    skill: str
+    module: str
+    link: str | None = None
+    priority: str
+@router.post("/command-center/strategy", tags=["command-center"])
+async def command_center_strategy(payload: StrategyRequest, user: dict[str, Any] = Depends(current_user)) -> StrategyResponse:
+    """Generate a comprehensive career strategy for the target role."""
+    from app.services import career_intel, digital_twin, market_intel
+
+    role_key = canonical_role(payload.target_role.replace("–", " ")) if payload.target_role else canonical_role(user.get("target_role"))
+    twin = digital_twin.skill_map(user["id"])
+    comparison = career_intel.compare(user["id"], role_key)
+
+    # Demonstrated vs unverified skills
+    demonstrated = []
+    unverified = []
+    for row in comparison["requirements"]:
+        key = row["skill"]
+        state = row["state"]
+        display = row["display"]
+        if state in TIER_CREDIT and TIER_CREDIT[state] >= 0.8:  # demonstrated or verified
+            demonstrated.append({"skill": key, "display": display, "status": state, "proficiency": row.get("proficiency", 0), "evidence": row.get("evidence", [])[:2]})
+        else:
+            unverified.append({"skill": key, "display": display, "status": state, "proficiency": row.get("proficiency", 0)})
+
+    # Critical skill gaps (missing or adjacent)
+    critical_gaps = []
+    for row in comparison["requirements"]:
+        if row["state"] == "missing" or row["state"] == "adjacent":
+            critical_gaps.append({"skill": row["skill"], "display": row["display"], "state": row["state"], "proficiency": row.get("proficiency", 0), "essential": row.get("essential", False), "closest_skill": row.get("closest_skill")})
+
+    # Market demand comparison
+    market_demand = []
+    if payload.include_market:
+        market_reqs = market_intel.role_requirements(role_key, user["id"])
+        # Align twin skills with market requirements
+        for req in market_reqs["requirements"][:10]:
+            skill = req["skill"]
+            market_postings = req.get("postings", 0)
+            # Check if user has this skill
+            has_skill = skill in twin if twin else False
+            market_demand.append({
+                "skill": skill,
+                "display": req.get("display", display_name(skill)),
+                "postings": market_postings,
+                "share": req.get("share"),
+                "user_has": has_skill,
+                "essential": req.get("essential", False)
+            })
+
+    # Recommended actions based on gaps
+    recommended_actions = []
+    for gap in critical_gaps[:5]:
+        if gap["state"] == "missing":
+            recommended_actions.append({
+                "action": "learn_skill",
+                "title": f"Learn {gap['display']}",
+                "explanation": f"This skill is marked as critical gap for {role_key} role",
+                "skill": gap["skill"],
+                "priority": "high",
+                "module": "skill_exchange"
+            })
+        elif gap["state"] == "adjacent":
+            recommended_actions.append({
+                "action": "bridge_skill",
+                "title": f"Bridge {gap['display']} gap",
+                "explanation": f"Build on adjacent skill to close the gap for {role_key}",
+                "skill": gap["skill"],
+                "priority": "medium",
+                "module": "career_quest"
+            })
+
+    alignment = comparison.get("alignment", 0.0)
+
+    return StrategyResponse(
+        role=role_key,
+        role_title=comparison.get("role", {}).get("title", role_title or role_key.title()),
+        alignment=alignment,
+        demonstrated_skills=demonstrated,
+        unverified_skills=unverified,
+        critical_gaps=critical_gaps,
+        market_demand=market_demand,
+        recommended_actions=recommended_actions
+    )
+@router.get("/command-center/gaps", tags=["command-center"])
+async def command_center_skill_gaps(user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
+    """Get skill gaps for the user's target role."""
+    from app.services import career_intel, digital_twin, market_intel
+
+    target_role = user.get("target_role")
+    if not target_role:
+        return {"gaps": [], "note": "No target role set. Please select a target career first."}
+
+    role_key = canonical_role(target_role.replace("–", " "))
+    comparison = career_intel.compare(user["id"], role_key)
+    twin = digital_twin.skill_map(user["id"])
+
+    gaps = []
+    for row in comparison["requirements"]:
+        if row["state"] in ("missing", "adjacent"):
+            gaps.append({
+                "skill": row["skill"],
+                "display": row["display"],
+                "state": row["state"],
+                "proficiency": row.get("proficiency", 0),
+                "essential": row.get("essential", False),
+                "evidence": twin.get(row["skill"], {}).get("evidence", []) if twin else []
+            })
+
+    # Group by priority
+    critical = [g for g in gaps if g["state"] == "missing" and g.get("essential")]
+    high = [g for g in gaps if g["state"] == "missing" and not g.get("essential")]
+    medium = [g for g in gaps if g["state"] == "adjacent"]
+
+    return {
+        "gaps": gaps,
+        "critical": critical,
+        "high": high,
+        "medium": medium,
+        "total": len(gaps),
+        "note": f"Found {len(gaps)} skill gaps for {target_role}"
+    }
+@router.get("/command-center/sprint", tags=["command-center"])
+async def command_center_sprint(user: dict[str, Any] = Depends(current_user)) -> SprintPlan:
+    """Generate a 7-day personalized career sprint plan."""
+    from app.services import career_intel, digital_twin, market_intel, skill_exchange
+    from datetime import datetime, timedelta
+    import re
+
+    target_role = user.get("target_role")
+    if not target_role:
+        # Return empty plan with note
+        return SprintPlan(
+            role=target_role or "",
+            generated_at=datetime.utcnow().isoformat(),
+            tasks=[],
+            total_duration="0h"
+        )
+
+    role_key = canonical_role(target_role.replace("–", " "))
+    comparison = career_intel.compare(user["id"], role_key)
+    twin = digital_twin.skill_map(user["id"])
+
+    tasks = []
+    total_minutes = 0
+
+    # Generate tasks based on gaps and next_steps
+    next_steps_result = career_intel.next_steps(comparison, limit=7)
+
+    for i, step in enumerate(next_steps_result.get("next_steps", [])[:7]):
+        if i >= 7:
+            break
+        task_title = step.get("action", "Learn skill")
+        display = step.get("display", "Unknown skill")
+        why = step.get("why", "Recommended for skill development")
+        duration = step.get("duration", "2h")
+        priority = step.get("priority", "medium")
+        related_module = step.get("related_module", "skill_exchange")
+
+        # Create action URL based on module
+        action_url = None
+        if related_module == "career_quest":
+            action_url = "/career-quest/start?difficulty=intermediate"
+        elif related_module == "skill_exchange":
+            action_url = f"/skill-exchange/browse?target={step.get('skill', '')}"
+        elif related_module == "interviews":
+            action_url = f"/interviews/practise?topic={step.get('skill', '')}"
+
+        task = SprintTask(
+            id=f"sprint_{datetime.utcnow().timestamp()}_{i}",
+            title=task_title,
+            explanation=why,
+            skill=step.get("skill", ""),
+            why=why,
+            duration=duration,
+            priority=priority,
+            module=related_module,
+            action_url=action_url
+        )
+        tasks.append(task)
+
+        # Estimate duration in minutes
+        dur_match = re.search(r"(\d+)", duration)
+        if dur_match:
+            total_minutes += int(dur_match.group(1))
+
+    total_hours = f"{total_minutes // 60}h {total_minutes % 60}m" if total_minutes else "0h"
+
+    return SprintPlan(
+        role=target_role,
+        generated_at=datetime.utcnow().isoformat(),
+        tasks=tasks,
+        total_duration=total_hours
+    )
+@router.get("/command-center/next-action", tags=["command-center"])
+async def command_center_next_action(user: dict[str, Any] = Depends(current_user)) -> NextActionResponse:
+    """Get the single highest-priority next action for the user."""
+    from app.services import career_intel, digital_twin, market_intel
+
+    target_role = user.get("target_role")
+    if not target_role:
+        return NextActionResponse(
+            action="set_goal",
+            title="Set Your Target Career",
+            explanation="Please select a target career role to receive personalized recommendations",
+            skill="",
+            module="command-center",
+            priority="high"
+        )
+
+    role_key = canonical_role(target_role.replace("–", " "))
+    comparison = career_intel.compare(user["id"], role_key)
+    twin = digital_twin.skill_map(user["id"])
+
+    # Find the highest-priority action
+    # Look for missing essential skills first
+    critical_missing = [r for r in comparison["requirements"] if r["state"] == "missing" and r.get("essential")]
+
+    if critical_missing:
+        gap = critical_missing[0]
+        action = "learn_skill"
+        title = f"Learn {gap['display']}"
+        explanation = f"This essential skill is missing for the {role_key} role. Starting with this will have the biggest impact on your career progression."
+        skill = gap["skill"]
+        module = "skill_exchange"
+        link = None
+        priority = "high"
+    elif comparison.get("alignment", 100) < 50:
+        # Low alignment - focus on bridging gaps
+        missing = [r for r in comparison["requirements"] if r["state"] == "missing"]
+        if missing:
+            gap = missing[0]
+            action = "bridge_skill"
+            title = f"Bridge the {gap['display']} gap"
+            explanation = f"Your alignment with the {role_key} role is low. Focus on building this missing skill."
+            skill = gap["skill"]
+            module = "career_quest"
+            link = None
+            priority = "high"
+        else:
+            return NextActionResponse(
+                action="assess",
+                title="Take Skills Assessment",
+                explanation="Complete a brief skills assessment to identify your current level.",
+                skill="",
+                module="interviews",
+                priority="medium"
+            )
+    else:
+        # Good alignment - focus on demonstrating skills
+        demonstrated = [r for r in comparison["requirements"] if r["state"] in TIER_CREDIT and TIER_CREDIT[r["state"]] >= 0.8]
+        if demonstrated:
+            skill = demonstrated[0]["skill"]
+            action = "practise"
+            title = f"Practise {skill} for interviews"
+            explanation = f"You have this skill demonstrated. Practise it with interview questions to reinforce your knowledge."
+            skill = skill
+            module = "interviews"
+            link = None
+            priority = "medium"
+        else:
+            # No skills demonstrated - start with career quest
+            action = "start_mission"
+            title = "Start a Career Quest Mission"
+            explanation = "Begin with a Career Quest mission to demonstrate your capabilities and build evidence."
+            skill = ""
+            module = "career_quest"
+            link = "/career-quest"
+            priority = "high"
+
+    return NextActionResponse(
+        action=action,
+        title=title,
+        explanation=explanation,
+        skill=skill,
+        module=module,
+        link=link,
+        priority=priority
+    )

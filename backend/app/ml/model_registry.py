@@ -43,6 +43,24 @@ def _directory_size_mb(path: Path) -> float:
     return round(total / (1024 * 1024), 1)
 
 
+def _embedding_cache_folder(model_name: str | None = None) -> Path:
+    """Reuse a matching Hugging Face cache before asking the hub to download weights."""
+    model_cache_key = "models--" + (model_name or settings.embedding_model).replace("/", "--")
+    candidates = [settings.model_cache_dir / "sentence-transformers"]
+    hf_home = os.environ.get("HF_HOME")
+    if hf_home:
+        home = Path(hf_home).expanduser()
+        candidates.extend((home / "hub", home))
+    # Ollama/HF runs have historically been launched from either the repo root
+    # or backend/, so the same cache can appear under this nested project path.
+    candidates.append(settings.model_cache_dir.parent / "backend" / "models" / "sentence-transformers")
+    candidates.append(Path.home() / ".cache" / "huggingface" / "hub")
+    for candidate in candidates:
+        if (candidate / model_cache_key).exists():
+            return candidate
+    return candidates[0]
+
+
 class ModelRegistry:
     def __init__(self) -> None:
         self._lock = threading.RLock()
@@ -84,18 +102,22 @@ class ModelRegistry:
             try:
                 from sentence_transformers import SentenceTransformer
 
+                cache_folder = _embedding_cache_folder(settings.embedding_model)
                 try:
                     self._embedder = SentenceTransformer(
                         settings.embedding_model,
-                        cache_folder=str(settings.model_cache_dir / "sentence-transformers"),
+                        cache_folder=str(cache_folder),
                         device="cpu",
+                        local_files_only=(cache_folder / ("models--" + settings.embedding_model.replace("/", "--"))).exists(),
                     )
                 except Exception as primary_error:  # noqa: BLE001
                     logger.warning("Primary embedding model failed (%s); trying fallback.", primary_error)
+                    fallback_cache = _embedding_cache_folder(settings.embedding_model_fallback)
                     self._embedder = SentenceTransformer(
                         settings.embedding_model_fallback,
-                        cache_folder=str(settings.model_cache_dir / "sentence-transformers"),
+                        cache_folder=str(fallback_cache),
                         device="cpu",
+                        local_files_only=(fallback_cache / ("models--" + settings.embedding_model_fallback.replace("/", "--"))).exists(),
                     )
                 self._embedding_dim = int(self._embedder.get_sentence_embedding_dimension())
                 self._embedding_load_ms = round((time.perf_counter() - started) * 1000, 1)
@@ -420,6 +442,59 @@ class ModelRegistry:
                 "error": str(exc),
                 "elapsed_ms": round((time.perf_counter() - started) * 1000, 1),
             }
+
+    async def generate_json_async(
+        self,
+        prompt: str,
+        *,
+        system: str = "You are SkillBridge AI, a precise career readiness assistant. Return valid JSON only.",
+        model: str | None = None,
+        timeout: int | None = None,
+        num_predict: int | None = None,
+        keep_alive: str | int | None = None,
+    ) -> dict[str, Any]:
+        """Async counterpart for API handlers that must not block the event loop."""
+        selected_model = model or settings.ollama_model
+        if not settings.enable_llm or not settings.ollama_base_url:
+            return {"ok": False, "data": None, "provider": "ollama_unavailable", "model": None, "error": "LLM generation is disabled or unconfigured.", "elapsed_ms": 0}
+        started = time.perf_counter()
+        try:
+            import httpx
+
+            client_timeout = httpx.Timeout(timeout or settings.ollama_timeout_seconds, connect=3.0)
+            base_url = settings.ollama_base_url.rstrip("/")
+            async with httpx.AsyncClient(timeout=client_timeout) as client:
+                tags_response = await client.get(f"{base_url}/api/tags")
+                tags_response.raise_for_status()
+                models = tags_response.json().get("models", [])
+                names = [item.get("name", "") for item in models]
+                if selected_model not in names:
+                    return {
+                        "ok": False, "data": None, "provider": "ollama_unavailable", "model": None,
+                        "error": f"{selected_model} is not installed in Ollama. Available: {', '.join(names) or 'none'}.",
+                        "elapsed_ms": round((time.perf_counter() - started) * 1000, 1),
+                    }
+                payload: dict[str, Any] = {
+                    "model": selected_model,
+                    "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+                    "stream": False,
+                    "format": "json",
+                    "options": {"temperature": 0.25, "num_predict": num_predict or settings.ollama_num_predict, "num_ctx": 4096},
+                }
+                if keep_alive is not None:
+                    payload["keep_alive"] = keep_alive
+                response = await client.post(f"{base_url}/api/chat", json=payload)
+                response.raise_for_status()
+                body = response.json()
+            content = body.get("message", {}).get("content", "") or body.get("response", "")
+            data = _parse_json_content(content)
+            elapsed = round((time.perf_counter() - started) * 1000, 1)
+            if data is None:
+                return {"ok": False, "data": None, "provider": "ollama", "model": selected_model, "error": "The model returned text that could not be parsed as JSON.", "raw": content[:1200], "elapsed_ms": elapsed}
+            return {"ok": True, "data": data, "provider": "ollama", "model": selected_model, "elapsed_ms": elapsed}
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Async Ollama generation failed: %s", exc)
+            return {"ok": False, "data": None, "provider": "ollama", "model": selected_model, "error": str(exc), "elapsed_ms": round((time.perf_counter() - started) * 1000, 1)}
 
     # ------------------------------------------------------------------
     # Status

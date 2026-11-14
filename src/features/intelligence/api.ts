@@ -381,3 +381,108 @@ export const TIER_STYLE: Record<Tier | "missing" | "adjacent", { label: string; 
   adjacent: { label: "Adjacent", dot: "#F4B942", chip: "border-[#F4B942]/50 bg-[#F4B942]/15 text-[#75451F]" },
   missing: { label: "Missing", dot: "#C62828", chip: "border-[#C62828]/25 bg-[#C62828]/8 text-[#C62828]" },
 };
+
+
+export const commandCenterApi = {
+  strategy: (payload: { target_role: string; include_market?: boolean }) =>
+    request<{
+      role: string;
+      role_title: string;
+      alignment: number;
+      demonstrated_skills: Array<{
+        skill: string;
+        display: string;
+        status: string;
+        proficiency: number;
+        evidence: Array<{ excerpt: string }>;
+      }>;
+      unverified_skills: Array<{
+        skill: string;
+        display: string;
+        status: string;
+        proficiency: number;
+      }>;
+      critical_gaps: Array<{
+        skill: string;
+        display: string;
+        state: string;
+        proficiency: number;
+        essential: boolean;
+        closest_skill?: string;
+      }>;
+      market_demand: Array<{
+        skill: string;
+        display: string;
+        postings: number;
+        share: number;
+        user_has: boolean;
+        essential: boolean;
+      }>;
+      recommended_actions: Array<{
+        action: string;
+        title: string;
+        skill: string;
+        priority: string;
+        module: string;
+      }>;
+    }>("/command-center/strategy", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  gaps: () => request<{
+    gaps: Array<{
+      skill: string;
+      display: string;
+      state: string;
+      proficiency: number;
+      essential: boolean;
+      evidence: Array<{ excerpt: string }>;
+    }>;
+    critical: Array<{
+      skill: string;
+      display: string;
+      state: string;
+      proficiency: number;
+      essential: boolean;
+    }>;
+    high: Array<{
+      skill: string;
+      display: string;
+      state: string;
+      proficiency: number;
+    }>;
+    medium: Array<{
+      skill: string;
+      display: string;
+      state: "adjacent";
+      proficiency: number;
+    }>;
+    total: number;
+    note: string;
+  }>("/command-center/gaps"),
+  sprint: () => request<{
+    role: string;
+    generated_at: string;
+    tasks: Array<{
+      id: string;
+      title: string;
+      explanation: string;
+      skill: string;
+      why: string;
+      duration: string;
+      priority: string;
+      module: string;
+      action_url: string | null;
+    }>;
+    total_duration: string;
+  }>("/command-center/sprint"),
+  nextAction: () => request<{
+    action: string;
+    title: string;
+    explanation: string;
+    skill: string;
+    module: string;
+    link: string | null;
+    priority: string;
+  }>("/command-center/next-action"),
+};
