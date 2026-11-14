@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Activity, Bell, Bookmark, BriefcaseBusiness, ChevronDown, FileText, GraduationCap, LayoutDashboard, Menu, MessageSquareText, Search, Settings2, Sparkles, Users, X } from "lucide-react";
+import { Activity, Bell, Bookmark, BriefcaseBusiness, ChevronDown, FileText, GraduationCap, LayoutDashboard, Menu, MessageSquareText, Search, Settings2, Sparkles, Trophy, Users, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ai } from "@/lib/ai/client";
 import { Toast } from "@/components/ui/primitives";
@@ -15,6 +15,7 @@ const candidateLinks = [
   { href: "/learn", label: "Learning hub", icon: GraduationCap },
   { href: "/interviews", label: "Mock interviews", icon: MessageSquareText },
   { href: "/jobs", label: "Explore jobs", icon: BriefcaseBusiness },
+  { href: "/games", label: "Battle Arena", icon: Trophy },
   { href: "/applications", label: "Applications", icon: Bookmark },
 ];
 const recruiterLinks = [
