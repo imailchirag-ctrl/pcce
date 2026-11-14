@@ -24,3 +24,16 @@ keybert>=0.8,<1.0
 
 # Anti-cheat face detection (headless build, no GUI deps)
 opencv-python-headless>=4.9,<5.0
+
+# Optional proctoring engines — anti_cheat.py degrades gracefully without them
+# (falls back to OpenCV Haar cascades for face detection).
+# mediapipe>=0.10            # FaceMesh / face_landmarker.task: 3D head pose + gaze (~100 MB)
+# ultralytics>=8.4           # YOLOv8n: person/phone/object detection (pulls torch, ~2 GB)
+# NOTE: install these AFTER opencv-python-headless. ultralytics pulls opencv-python 5.x,
+# which drops cv2.CascadeClassifier. If that happens:
+#   pip uninstall -y opencv-python opencv-contrib-python
+#   pip install "opencv-python-headless>=4.10,<5.0"
+# NOTE: PyPI torchvision is a CUDA build and fails on a CPU torch with
+# "operator torchvision::nms does not exist". Install the matching CPU build:
+#   pip install --force-reinstall --no-deps "torchvision==0.29.2+cpu" \
+#       --index-url https://download.pytorch.org/whl/cpu
