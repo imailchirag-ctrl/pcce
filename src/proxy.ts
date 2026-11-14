@@ -8,6 +8,7 @@ const PROTECTED = [
   "/twin",
   "/market",
   "/exchange",
+  "/games",
   "/resume",
   "/career",
   "/learn",
