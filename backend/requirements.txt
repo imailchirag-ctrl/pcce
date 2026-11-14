@@ -21,3 +21,6 @@ keybert>=0.8,<1.0
 
 # Optional reranker. BGE-M3 is ~2.2 GB; enable only if RAM allows:
 # sentence-transformers already provides CrossEncoder support.
+
+# Anti-cheat face detection (headless build, no GUI deps)
+opencv-python-headless>=4.9,<5.0

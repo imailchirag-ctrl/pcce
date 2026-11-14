@@ -62,6 +62,7 @@ class InterviewPayload(BaseModel):
     role: str = Field(default="Frontend Engineer", min_length=2, max_length=120)
     mode: str = Field(default="technical", max_length=60)
     difficulty: str = Field(default="intermediate", max_length=30)
+    count: int = Field(default=12, ge=5, le=25)
     resume_context: str = Field(default="", max_length=6000)
     skills: list[str] = Field(default_factory=list, max_length=40)
     use_llm: bool = True
@@ -112,6 +113,19 @@ class ApplicationStatusPayload(BaseModel):
 
 class WarmPayload(BaseModel):
     models: list[str] = Field(default_factory=lambda: ["embeddings", "spacy"], max_length=8)
+
+
+class FramePayload(BaseModel):
+    frame_b64: str = Field(min_length=10)
+    session_id: str | None = Field(default=None, max_length=120)
+    timestamp: float | None = Field(default=None)
+
+
+class ProctorActionPayload(BaseModel):
+    session_id: str = Field(min_length=1, max_length=120)
+    action: str = Field(min_length=2, max_length=40)
+    message: str | None = Field(default=None, max_length=500)
+    sender: str | None = Field(default="Interviewer", max_length=80)
 
 
 def _require_recruiter(user: dict[str, Any]) -> None:
@@ -620,6 +634,7 @@ async def interview_questions(payload: InterviewPayload, user: dict[str, Any] = 
         payload.difficulty,
         payload.resume_context,
         payload.skills,
+        count=payload.count,
         use_llm=payload.use_llm,
     )
     if payload.save_session and result["questions"]:
@@ -681,6 +696,120 @@ async def interview_session(session_id: str, user: dict[str, Any] = Depends(curr
     if not session or session["user_id"] != user["id"]:
         raise HTTPException(404, "Interview session not found.")
     return session
+
+
+@router.post("/interviews/anticheat", tags=["interviews"])
+async def interview_anticheat(payload: FramePayload) -> dict[str, Any]:
+    from app.ml.anti_cheat import analyze_frame
+    return analyze_frame(payload.frame_b64, session_id=payload.session_id, timestamp=payload.timestamp)
+
+
+@router.post("/interviews/anticheat/reset/{session_id}", tags=["interviews"])
+async def interview_anticheat_reset(session_id: str) -> dict[str, Any]:
+    from app.ml.anti_cheat import reset_session
+    reset_session(session_id)
+    return {"status": "ok", "message": f"Proctoring session {session_id} reset"}
+
+
+@router.get("/interviews/anticheat/proctor/{session_id}", tags=["interviews"])
+async def interview_anticheat_proctor(session_id: str) -> dict[str, Any]:
+    from app.ml.anti_cheat import get_session
+    session = get_session(session_id)
+    if not session:
+        return {
+            "session_id": session_id,
+            "connected": False,
+            "latest_frame_b64": "",
+            "latest_telemetry": {},
+            "latest_boxes": {},
+            "multi_face_strikes": 0,
+            "terminated": False,
+            "negative_marking": None,
+            "events_log": [],
+            "proctor_messages": [],
+            "integrity_score": 100,
+        }
+    negative_marking = None
+    if session.terminated_for_cheating:
+        negative_marking = {
+            "penalty_score": -25,
+            "status": "DISQUALIFIED",
+            "verdict": "FAIL - Disqualified for Repeated Multiple Candidates Malpractice",
+            "strike_records": session.strike_records,
+            "incident_summary": (
+                "Candidate detected with secondary unauthorized individuals in the examination room on 3 separate occasions. "
+                "Automatic termination triggered under strict academic and interview proctoring guidelines."
+            ),
+        }
+    return {
+        "session_id": session.session_id,
+        "connected": True,
+        "latest_frame_b64": session.latest_frame_b64,
+        "latest_telemetry": session.latest_telemetry,
+        "latest_boxes": session.latest_boxes,
+        "multi_face_strikes": session.multi_face_strikes,
+        "terminated": session.terminated_for_cheating,
+        "negative_marking": negative_marking,
+        "events_log": [
+            {
+                "id": ev.id,
+                "rule": ev.rule,
+                "event_type": ev.event_type,
+                "severity": ev.severity,
+                "description": ev.description,
+                "duration_seconds": ev.duration_seconds,
+                "active": True,
+            }
+            for ev in session.active_events.values()
+        ] + session.completed_events[-15:],
+        "proctor_messages": session.proctor_messages[-10:],
+        "integrity_score": session.integrity_score,
+    }
+
+
+@router.post("/interviews/anticheat/proctor/action", tags=["interviews"])
+async def interview_anticheat_proctor_action(payload: ProctorActionPayload) -> dict[str, Any]:
+    from datetime import datetime, timezone
+    from app.ml.anti_cheat import add_proctor_message, get_or_create_session
+    session = get_or_create_session(payload.session_id)
+    action = payload.action.upper()
+    sender = payload.sender or "Interviewer"
+    msg = payload.message or f"Proctor action: {action}"
+
+    if action == "WARN":
+        add_proctor_message(payload.session_id, f"WARNING: {msg}", sender=sender)
+        session.integrity_score = max(0, session.integrity_score - 10)
+    elif action == "ADD_STRIKE":
+        session.multi_face_strikes += 1
+        now_str = datetime.now(timezone.utc).strftime("%H:%M:%S")
+        session.strike_records.append({
+            "strike_number": session.multi_face_strikes,
+            "timestamp": now_str,
+            "reason": msg,
+        })
+        add_proctor_message(payload.session_id, f"STRIKE {session.multi_face_strikes}/3 ISSUED: {msg}", sender=sender)
+        if session.multi_face_strikes >= 3:
+            session.terminated_for_cheating = True
+            session.integrity_score = 0
+    elif action == "TERMINATE":
+        session.multi_face_strikes = max(3, session.multi_face_strikes)
+        session.terminated_for_cheating = True
+        session.integrity_score = 0
+        add_proctor_message(payload.session_id, f"TERMINATION DISPATCHED: {msg}", sender=sender)
+    elif action == "RESET_STRIKES":
+        session.multi_face_strikes = 0
+        session.terminated_for_cheating = False
+        add_proctor_message(payload.session_id, "Strikes have been reset by proctor.", sender=sender)
+    elif action == "MESSAGE":
+        add_proctor_message(payload.session_id, msg, sender=sender)
+
+    return {
+        "status": "ok",
+        "action": action,
+        "session_id": payload.session_id,
+        "multi_face_strikes": session.multi_face_strikes,
+        "terminated": session.terminated_for_cheating,
+    }
 
 
 # ---------------------------------------------------------------------------
