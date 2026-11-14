@@ -264,23 +264,23 @@ export function InterviewerLiveView({
   return (
     <div className="mx-auto max-w-7xl space-y-4 p-2 sm:p-4">
       {/* Top Command Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#eeeaf4] bg-white p-4 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#EDE6DA] bg-white p-4 shadow-sm">
         <div className="flex items-center gap-3">
           {onBack && (
             <button
               onClick={onBack}
-              className="grid size-9 place-items-center rounded-xl border border-[#eeeaf4] bg-white text-[#746d85] hover:bg-[#faf9fc]"
+              className="grid size-9 place-items-center rounded-xl border border-[#EDE6DA] bg-white text-[#6F675C] hover:bg-[#FFFCF6]"
               title="Return"
             >
               <ChevronLeft size={16} />
             </button>
           )}
-          <span className="grid size-11 place-items-center rounded-2xl bg-[#f0edff] text-[#7258dc] shadow-sm">
+          <span className="grid size-11 place-items-center rounded-2xl bg-[#FFF5E5] text-[#75451F] shadow-sm">
             <Radio size={22} className="animate-pulse" />
           </span>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-semibold text-[#2d2640]">Interviewer Proctoring Command Center</h1>
+              <h1 className="text-base font-semibold text-[#24211D]">Interviewer Proctoring Command Center</h1>
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                 state.connected ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-amber-50 text-amber-700 border border-amber-200"
               }`}>
@@ -288,8 +288,8 @@ export function InterviewerLiveView({
                 {state.connected ? (broadcastActive ? "Live Feed (P2P Stream)" : "Live Feed (API Synced)") : "Waiting for Stream"}
               </span>
             </div>
-            <p className="mt-0.5 text-xs text-[#8f88a0]">
-              Session ID: <code className="font-mono text-[#7257df]">{sessionId}</code> · 3-Strike Disqualification & Negative Marking Active
+            <p className="mt-0.5 text-xs text-[#6F675C]">
+              Session ID: <code className="font-mono text-[#75451F]">{sessionId}</code> · 3-Strike Disqualification & Negative Marking Active
             </p>
           </div>
         </div>
@@ -297,11 +297,11 @@ export function InterviewerLiveView({
         {/* Top Indicators */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Integrity Badge */}
-          <div className="flex items-center gap-2 rounded-xl border border-[#eeeaf4] bg-[#faf9fd] px-3.5 py-2">
-            <Shield size={16} className={state.integrity_score >= 80 ? "text-[#3f8b60]" : "text-[#c05a40]"} />
+          <div className="flex items-center gap-2 rounded-xl border border-[#EDE6DA] bg-[#FFFCF6] px-3.5 py-2">
+            <Shield size={16} className={state.integrity_score >= 80 ? "text-[#2E7D32]" : "text-[#C62828]"} />
             <div>
-              <p className="text-[10px] uppercase font-bold text-[#9b94a0]">Integrity Score</p>
-              <p className={`text-xs font-bold ${state.integrity_score >= 80 ? "text-[#3f8b60]" : "text-[#c05a40]"}`}>
+              <p className="text-[10px] uppercase font-bold text-[#6F675C]">Integrity Score</p>
+              <p className={`text-xs font-bold ${state.integrity_score >= 80 ? "text-[#2E7D32]" : "text-[#C62828]"}`}>
                 {state.integrity_score}%
               </p>
             </div>
@@ -315,7 +315,7 @@ export function InterviewerLiveView({
               ? "border-amber-300 bg-amber-50 text-amber-700"
               : strikes === 1
               ? "border-yellow-300 bg-yellow-50 text-yellow-700"
-              : "border-[#eeeaf4] bg-[#faf9fd] text-[#2d2640]"
+              : "border-[#EDE6DA] bg-[#FFFCF6] text-[#24211D]"
           }`}>
             <ShieldAlert size={16} />
             <div>
@@ -328,7 +328,7 @@ export function InterviewerLiveView({
 
           <button
             onClick={() => void fetchProctorData()}
-            className="grid size-9 place-items-center rounded-xl border border-[#eeeaf4] bg-white text-[#746d85] hover:bg-[#faf9fc]"
+            className="grid size-9 place-items-center rounded-xl border border-[#EDE6DA] bg-white text-[#6F675C] hover:bg-[#FFFCF6]"
             title="Refresh State"
           >
             <RefreshCw size={15} />
@@ -338,7 +338,7 @@ export function InterviewerLiveView({
 
       {/* Disqualification Banner if Terminated */}
       {isTerminated && (
-        <div className="rounded-3xl border-2 border-red-500 bg-red-950/90 p-5 text-white shadow-2xl backdrop-blur-md">
+        <div className="rounded-2xl border-2 border-red-500 bg-red-950/90 p-5 text-white shadow-2xl backdrop-blur-md">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <span className="grid size-12 place-items-center rounded-2xl bg-red-600 text-white shadow-md">
@@ -372,7 +372,7 @@ export function InterviewerLiveView({
       <div className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
         {/* Left Column: Live Video Canvas & Biometric Reticle */}
         <div className="space-y-3">
-          <div className="relative overflow-hidden rounded-3xl border border-[#2a273a] bg-[#0c0a14] shadow-2xl" style={{ aspectRatio: "4/3" }}>
+          <div className="relative overflow-hidden rounded-2xl border border-[#2a273a] bg-[#0c0a14] shadow-2xl" style={{ aspectRatio: "4/3" }}>
             {/* Live Video Canvas Image */}
             {state.latest_frame_b64 ? (
               <img
@@ -394,10 +394,10 @@ export function InterviewerLiveView({
               <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
 
               {/* Glowing Corner Reticles */}
-              <div className="absolute top-4 left-4 h-6 w-6 border-l-2 border-t-2 border-[#8066e9]" />
-              <div className="absolute top-4 right-4 h-6 w-6 border-r-2 border-t-2 border-[#8066e9]" />
-              <div className="absolute bottom-4 left-4 h-6 w-6 border-l-2 border-b-2 border-[#8066e9]" />
-              <div className="absolute bottom-4 right-4 h-6 w-6 border-r-2 border-b-2 border-[#8066e9]" />
+              <div className="absolute top-4 left-4 h-6 w-6 border-l-2 border-t-2 border-[#F4B942]" />
+              <div className="absolute top-4 right-4 h-6 w-6 border-r-2 border-t-2 border-[#F4B942]" />
+              <div className="absolute bottom-4 left-4 h-6 w-6 border-l-2 border-b-2 border-[#F4B942]" />
+              <div className="absolute bottom-4 right-4 h-6 w-6 border-r-2 border-b-2 border-[#F4B942]" />
 
               {/* Live Status HUD Tags in Top Left */}
               <div className="absolute top-4 left-6 flex items-center gap-2">
@@ -405,7 +405,7 @@ export function InterviewerLiveView({
                   <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   PROCTOR LIVE FEED
                 </span>
-                <span className="rounded-md bg-black/60 px-2 py-1 text-[10px] font-mono text-purple-300 backdrop-blur-md">
+                <span className="rounded-md bg-black/60 px-2 py-1 text-[10px] font-mono text-[#F4B942] backdrop-blur-md">
                   MediaPipe 3D · YOLOv8
                 </span>
               </div>
@@ -436,7 +436,7 @@ export function InterviewerLiveView({
                         cx={mx}
                         cy={my}
                         r={1.8}
-                        fill="#38bdf8"
+                        fill="#F4B942"
                       />
                     ))}
                   </g>
@@ -496,7 +496,7 @@ export function InterviewerLiveView({
                         width={w}
                         height={h}
                         fill="none"
-                        stroke="#f97316"
+                        stroke="#E99A32"
                         strokeWidth={2.5}
                         rx={6}
                       />
@@ -505,7 +505,7 @@ export function InterviewerLiveView({
                         y={Math.max(0, y1 - 22)}
                         width={Math.max(130, w)}
                         height={20}
-                        fill="#f97316"
+                        fill="#E99A32"
                         opacity={0.92}
                         rx={4}
                       />
@@ -531,7 +531,7 @@ export function InterviewerLiveView({
                 <button
                   onClick={() => setShowBoxes((b) => !b)}
                   className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
-                    showBoxes ? "bg-[#8066e9] text-white" : "bg-white/10 text-white/70"
+                    showBoxes ? "bg-[#F4B942] text-[#24211D]" : "bg-white/10 text-white/70"
                   }`}
                 >
                   <Layers size={13} /> Bounding Boxes
@@ -539,7 +539,7 @@ export function InterviewerLiveView({
                 <button
                   onClick={() => setShowMesh((m) => !m)}
                   className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
-                    showMesh ? "bg-[#38bdf8] text-slate-950 font-bold" : "bg-white/10 text-white/70"
+                    showMesh ? "bg-[#F4B942] text-slate-950 font-bold" : "bg-white/10 text-white/70"
                   }`}
                 >
                   <Sparkles size={13} /> 3D Face Wireframe
@@ -555,14 +555,14 @@ export function InterviewerLiveView({
           {/* Biometric Telemetry Sensors */}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {/* Sensor 1: Head Pose */}
-            <div className="rounded-2xl border border-[#eeeaf4] bg-white p-3 shadow-sm">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9b94a0]">3D Head Pose</span>
+            <div className="rounded-2xl border border-[#EDE6DA] bg-white p-3 shadow-sm">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6F675C]">3D Head Pose</span>
               <div className="mt-1 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-[#2d2640]">
+                  <p className="text-xs font-bold text-[#24211D]">
                     {state.latest_telemetry.head_pose?.direction || "CENTER"}
                   </p>
-                  <p className="text-[10px] text-[#8f88a0]">
+                  <p className="text-[10px] text-[#6F675C]">
                     Yaw {state.latest_telemetry.head_pose?.yaw ?? 0}° · Pitch {state.latest_telemetry.head_pose?.pitch ?? 0}°
                   </p>
                 </div>
@@ -573,14 +573,14 @@ export function InterviewerLiveView({
             </div>
 
             {/* Sensor 2: Eye Gaze */}
-            <div className="rounded-2xl border border-[#eeeaf4] bg-white p-3 shadow-sm">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9b94a0]">Eye Gaze</span>
+            <div className="rounded-2xl border border-[#EDE6DA] bg-white p-3 shadow-sm">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6F675C]">Eye Gaze</span>
               <div className="mt-1 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-[#2d2640]">
+                  <p className="text-xs font-bold text-[#24211D]">
                     {state.latest_telemetry.eye_gaze?.direction || "CENTER"}
                   </p>
-                  <p className="text-[10px] text-[#8f88a0]">
+                  <p className="text-[10px] text-[#6F675C]">
                     Iris Ratio: {Math.round((state.latest_telemetry.eye_gaze?.ratio ?? 0.5) * 100)}%
                   </p>
                 </div>
@@ -591,32 +591,32 @@ export function InterviewerLiveView({
             </div>
 
             {/* Sensor 3: Whisper / Mouth */}
-            <div className="rounded-2xl border border-[#eeeaf4] bg-white p-3 shadow-sm">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9b94a0]">Mouth Activity</span>
+            <div className="rounded-2xl border border-[#EDE6DA] bg-white p-3 shadow-sm">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6F675C]">Mouth Activity</span>
               <div className="mt-1 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-[#2d2640]">
+                  <p className="text-xs font-bold text-[#24211D]">
                     {state.latest_telemetry.micro_metrics?.mouth_open ? "Speaking / Moving" : "Resting"}
                   </p>
-                  <p className="text-[10px] text-[#8f88a0]">
+                  <p className="text-[10px] text-[#6F675C]">
                     Aperture: {state.latest_telemetry.micro_metrics?.mouth_ratio ?? 0}
                   </p>
                 </div>
                 <span className={`size-2.5 rounded-full ${
-                  state.latest_telemetry.micro_metrics?.mouth_open ? "bg-purple-500" : "bg-slate-300"
+                  state.latest_telemetry.micro_metrics?.mouth_open ? "bg-[#E99A32]" : "bg-slate-300"
                 }`} />
               </div>
             </div>
 
             {/* Sensor 4: People & Objects */}
-            <div className="rounded-2xl border border-[#eeeaf4] bg-white p-3 shadow-sm">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9b94a0]">People & Devices</span>
+            <div className="rounded-2xl border border-[#EDE6DA] bg-white p-3 shadow-sm">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6F675C]">People & Devices</span>
               <div className="mt-1 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-[#2d2640]">
+                  <p className="text-xs font-bold text-[#24211D]">
                     {state.latest_telemetry.people_count ?? 1} Person(s)
                   </p>
-                  <p className="text-[10px] text-[#8f88a0]">
+                  <p className="text-[10px] text-[#6F675C]">
                     {state.latest_boxes.objects?.filter((o) => o.flagged).length ? "Device Flagged 📱" : "No devices"}
                   </p>
                 </div>
@@ -630,19 +630,19 @@ export function InterviewerLiveView({
           </div>
 
           {/* Live Transcript Stream */}
-          <div className="rounded-2xl border border-[#eeeaf4] bg-white p-4 shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#f1edf8] pb-2">
+          <div className="rounded-2xl border border-[#EDE6DA] bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-[#EDE6DA] pb-2">
               <div className="flex items-center gap-2">
-                <Mic size={15} className="text-[#7258dc]" />
-                <h3 className="text-xs font-semibold text-[#2d2640]">Candidate Live Speech Transcript</h3>
+                <Mic size={15} className="text-[#75451F]" />
+                <h3 className="text-xs font-semibold text-[#24211D]">Candidate Live Speech Transcript</h3>
               </div>
-              <span className="text-[10px] font-mono text-[#8f88a0]">Real-time STT feed</span>
+              <span className="text-[10px] font-mono text-[#6F675C]">Real-time STT feed</span>
             </div>
-            <div className="mt-3 min-h-[50px] rounded-xl bg-[#faf9fd] p-3 text-xs leading-5 text-[#2d2640]">
+            <div className="mt-3 min-h-[50px] rounded-xl bg-[#FFFCF6] p-3 text-xs leading-5 text-[#24211D]">
               {state.transcript ? (
                 <span>&ldquo;{state.transcript}&rdquo;</span>
               ) : (
-                <span className="italic text-[#9b94a0]">Candidate has not spoken yet in this question…</span>
+                <span className="italic text-[#6F675C]">Candidate has not spoken yet in this question…</span>
               )}
             </div>
           </div>
@@ -651,13 +651,13 @@ export function InterviewerLiveView({
         {/* Right Column: Strike Controls & Proctoring Log */}
         <div className="space-y-3">
           {/* Strike Management Panel */}
-          <div className="rounded-2xl border border-[#eeeaf4] bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#f1edf8] pb-3">
+          <div className="rounded-2xl border border-[#EDE6DA] bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between border-b border-[#EDE6DA] pb-3">
               <div>
-                <h3 className="text-sm font-semibold text-[#2d2640]">Strike & Disqualification Center</h3>
-                <p className="text-[11px] text-[#8f88a0]">Multi-face policy: 3 strikes = auto termination with negative marking</p>
+                <h3 className="text-sm font-semibold text-[#24211D]">Strike & Disqualification Center</h3>
+                <p className="text-[11px] text-[#6F675C]">Multi-face policy: 3 strikes = auto termination with negative marking</p>
               </div>
-              <span className="rounded-lg bg-[#f0edff] px-2.5 py-1 text-xs font-bold text-[#7258dc]">
+              <span className="rounded-lg bg-[#FFF5E5] px-2.5 py-1 text-xs font-bold text-[#75451F]">
                 Strike {strikes} / 3
               </span>
             </div>
@@ -674,7 +674,7 @@ export function InterviewerLiveView({
                         ? num === 3
                           ? "border-red-500 bg-red-50 text-red-700"
                           : "border-amber-400 bg-amber-50 text-amber-700"
-                        : "border-[#eeeaf4] bg-[#faf9fd] text-[#9b94a0]"
+                        : "border-[#EDE6DA] bg-[#FFFCF6] text-[#6F675C]"
                     }`}
                   >
                     <p className="text-[10px] font-bold uppercase tracking-wider">Strike {num}</p>
@@ -708,7 +708,7 @@ export function InterviewerLiveView({
                 <button
                   onClick={() => sendProctorAction("RESET_STRIKES", "Strikes cleared by interviewer")}
                   disabled={sendingAction}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#eeeaf4] bg-white px-4 py-2 text-xs font-semibold text-[#746d85] hover:bg-[#faf9fc]"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#EDE6DA] bg-white px-4 py-2 text-xs font-semibold text-[#6F675C] hover:bg-[#FFFCF6]"
                 >
                   <RefreshCw size={13} /> Reset Strikes to 0
                 </button>
@@ -717,9 +717,9 @@ export function InterviewerLiveView({
           </div>
 
           {/* Send Proctor Warning to Candidate */}
-          <div className="rounded-2xl border border-[#eeeaf4] bg-white p-5 shadow-sm">
-            <h3 className="text-xs font-semibold text-[#2d2640]">Dispatch Live Warning / Message</h3>
-            <p className="mt-0.5 text-[10px] text-[#8f88a0]">This will pop up immediately on the candidate&apos;s interview HUD.</p>
+          <div className="rounded-2xl border border-[#EDE6DA] bg-white p-5 shadow-sm">
+            <h3 className="text-xs font-semibold text-[#24211D]">Dispatch Live Warning / Message</h3>
+            <p className="mt-0.5 text-[10px] text-[#6F675C]">This will pop up immediately on the candidate&apos;s interview HUD.</p>
 
             <div className="mt-3 flex gap-2">
               <input
@@ -727,12 +727,12 @@ export function InterviewerLiveView({
                 value={customMsg}
                 onChange={(e) => setCustomMsg(e.target.value)}
                 placeholder="e.g. Please face the screen and remove phones..."
-                className="flex-1 rounded-xl border border-[#eeeaf4] bg-[#faf9fd] px-3 py-2 text-xs text-[#2d2640] placeholder:text-[#a09aab] focus:border-[#7257df] focus:outline-none"
+                className="flex-1 rounded-xl border border-[#EDE6DA] bg-[#FFFCF6] px-3 py-2 text-xs text-[#24211D] placeholder:text-[#6F675C] focus:border-[#F4B942] focus:outline-none"
               />
               <button
                 onClick={() => sendProctorAction("WARN", customMsg)}
                 disabled={!customMsg.trim() || sendingAction}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-[#7257df] px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#6349ce] disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#F4B942] px-3.5 py-2 text-xs font-semibold text-[#24211D] hover:bg-[#E99A32] disabled:opacity-50"
               >
                 <Send size={13} /> Send
               </button>
@@ -748,7 +748,7 @@ export function InterviewerLiveView({
                 <button
                   key={preset}
                   onClick={() => sendProctorAction("WARN", preset)}
-                  className="rounded-lg border border-[#eeeaf4] bg-[#faf9fd] px-2.5 py-1 text-[10px] font-medium text-[#746d85] hover:border-[#8066e9] hover:text-[#7257df]"
+                  className="rounded-lg border border-[#EDE6DA] bg-[#FFFCF6] px-2.5 py-1 text-[10px] font-medium text-[#6F675C] hover:border-[#F4B942] hover:text-[#75451F]"
                 >
                   {preset}
                 </button>
@@ -757,34 +757,34 @@ export function InterviewerLiveView({
           </div>
 
           {/* Real-time Flagged Events Timeline */}
-          <div className="rounded-2xl border border-[#eeeaf4] bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#f1edf8] pb-3">
-              <h3 className="text-xs font-semibold text-[#2d2640]">Audit & Malpractice Log</h3>
-              <span className="text-[10px] font-bold text-[#7257df]">{state.events_log.length} incidents</span>
+          <div className="rounded-2xl border border-[#EDE6DA] bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between border-b border-[#EDE6DA] pb-3">
+              <h3 className="text-xs font-semibold text-[#24211D]">Audit & Malpractice Log</h3>
+              <span className="text-[10px] font-bold text-[#75451F]">{state.events_log.length} incidents</span>
             </div>
 
             <div className="mt-3 space-y-2 max-h-[300px] overflow-y-auto">
               {state.events_log.length === 0 ? (
-                <div className="py-6 text-center text-xs text-[#8f88a0]">
+                <div className="py-6 text-center text-xs text-[#6F675C]">
                   <CheckCircle2 size={24} className="mx-auto mb-1.5 text-emerald-500" />
                   No violations or suspicious behavior detected.
                 </div>
               ) : (
                 state.events_log.map((ev, i) => (
-                  <div key={i} className="rounded-xl border border-[#f0edf7] bg-[#fbfaff] p-2.5 text-xs">
+                  <div key={i} className="rounded-xl border border-[#EDE6DA] bg-[#FFFCF6] p-2.5 text-xs">
                     <div className="flex items-center justify-between">
                       <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
                         ev.severity === "HIGH" || ev.severity === "CRITICAL"
                           ? "bg-red-100 text-red-700"
                           : ev.severity === "MEDIUM"
                           ? "bg-amber-100 text-amber-700"
-                          : "bg-blue-100 text-blue-700"
+                          : "bg-[#FFF5E5] text-[#75451F]"
                       }`}>
                         {ev.severity}
                       </span>
-                      <span className="text-[10px] text-[#8f88a0]">{ev.rule}</span>
+                      <span className="text-[10px] text-[#6F675C]">{ev.rule}</span>
                     </div>
-                    <p className="mt-1 text-[11px] font-medium text-[#2d2640]">{ev.description}</p>
+                    <p className="mt-1 text-[11px] font-medium text-[#24211D]">{ev.description}</p>
                   </div>
                 ))
               )}

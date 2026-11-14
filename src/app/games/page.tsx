@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { AppShell } from "@/components/layout/app-shell";
@@ -118,10 +118,10 @@ function GamesPage() {
         setWarnings((w) => {
           const nextW = w + 1;
           if (nextW >= 2) {
-            alert("âš ï¸ Anti-Cheat Violation: Multiple tab switches detected. Match forfeited.");
+            alert("⚠️ Anti-Cheat Violation: Multiple tab switches detected. Match forfeited.");
             endMatch("loss");
           } else {
-            alert("âš ï¸ Warning: Leaving the game window is restricted and flagged as cheating!");
+            alert("⚠️ Warning: Leaving the game window is restricted and flagged as cheating!");
           }
           return nextW;
         });
@@ -289,28 +289,28 @@ function GamesPage() {
   return (
     <div className="space-y-8 pb-12">
       {/* Header & Stats Bar */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-[#eeebf4] shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-[#EDE6DA] shadow-sm">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#f0edff] px-3 py-1 text-xs font-semibold text-[#674dd1]">
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#FFF5E5] px-3 py-1 text-xs font-semibold text-[#75451F]">
             <Trophy size={14} /> SkillBridge Battle Arena
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#302944] mt-2">Competitive Skill Battles & Practice Arena</h1>
-          <p className="text-sm text-[#777187]">Randomized practice matches with per-question timers and interactive navigation.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-[#24211D] mt-2">Competitive Skill Battles & Practice Arena</h1>
+          <p className="text-sm text-[#6F675C]">Randomized practice matches with per-question timers and interactive navigation.</p>
         </div>
-        <div className="flex items-center gap-4 bg-[#faf9fc] p-3 rounded-xl border border-[#eeebf4]">
+        <div className="flex items-center gap-4 bg-[#FFFCF6] p-3 rounded-xl border border-[#EDE6DA]">
           <div className="text-center px-3">
-            <div className="text-xs text-[#777187]">Wins</div>
-            <div className="text-lg font-bold text-[#4aab72]">{stats.wins}</div>
+            <div className="text-xs text-[#6F675C]">Wins</div>
+            <div className="text-lg font-bold text-[#2E7D32]">{stats.wins}</div>
           </div>
-          <div className="text-center px-3 border-x border-[#eeebf4]">
-            <div className="text-xs text-[#777187]">Losses</div>
-            <div className="text-lg font-bold text-[#d9534f]">{stats.losses}</div>
+          <div className="text-center px-3 border-x border-[#EDE6DA]">
+            <div className="text-xs text-[#6F675C]">Losses</div>
+            <div className="text-lg font-bold text-[#C62828]">{stats.losses}</div>
           </div>
           <div className="text-center px-3 flex items-center gap-2">
-            <Flame className="text-[#f59e0b]" size={20} />
+            <Flame className="text-[#E99A32]" size={20} />
             <div>
-              <div className="text-xs text-[#777187]">Streak</div>
-              <div className="text-lg font-bold text-[#f59e0b]">{stats.streak}</div>
+              <div className="text-xs text-[#6F675C]">Streak</div>
+              <div className="text-lg font-bold text-[#E99A32]">{stats.streak}</div>
             </div>
           </div>
         </div>
@@ -321,108 +321,108 @@ function GamesPage() {
       )}
 
       {loadingQuestions ? (
-        <div className="max-w-md mx-auto bg-white border border-[#eeebf4] p-12 rounded-2xl text-center shadow-sm">
-          <Loader2 className="w-12 h-12 text-[#7559e8] animate-spin mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-[#302944]">Preparing Your Questions...</h3>
-          <p className="text-sm text-[#777187] mt-1">Creating a fresh randomized practice set.</p>
+        <div className="max-w-md mx-auto bg-white border border-[#EDE6DA] p-12 rounded-2xl text-center shadow-sm">
+          <Loader2 className="w-12 h-12 text-[#75451F] animate-spin mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-[#24211D]">Preparing Your Questions...</h3>
+          <p className="text-sm text-[#6F675C] mt-1">Creating a fresh randomized practice set.</p>
         </div>
       ) : !matchStarted ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white border border-[#eeebf4] p-6 rounded-2xl flex flex-col justify-between shadow-sm hover:border-[#7559e8] transition">
+          <div className="bg-white border border-[#EDE6DA] p-6 rounded-2xl flex flex-col justify-between shadow-sm hover:border-[#F4B942] transition">
             <div>
-              <div className="size-12 rounded-xl bg-[#f0edff] text-[#7559e8] flex items-center justify-center mb-4"><Code2 size={24} /></div>
-              <h3 className="text-lg font-bold text-[#302944]">Coding Challenge</h3>
-              <p className="text-sm text-[#777187] mt-2">Solve a randomized algorithm problem in the side editor and get a basic local code review.</p>
-              <div className="mt-4 text-xs font-semibold text-[#7559e8]">â±ï¸ 5 Minutes Timer</div>
+              <div className="size-12 rounded-xl bg-[#FFF5E5] text-[#75451F] flex items-center justify-center mb-4"><Code2 size={24} /></div>
+              <h3 className="text-lg font-bold text-[#24211D]">Coding Challenge</h3>
+              <p className="text-sm text-[#6F675C] mt-2">Solve a randomized algorithm problem in the side editor and get a basic local code review.</p>
+              <div className="mt-4 text-xs font-semibold text-[#75451F]">⏱️ 5 Minutes Timer</div>
             </div>
-            <button onClick={() => startMatch("coding")} className="mt-6 w-full bg-[#7559e8] hover:bg-[#6849df] text-white font-medium py-3 rounded-xl transition flex items-center justify-center gap-2">
+            <button onClick={() => startMatch("coding")} className="mt-6 w-full bg-[#F4B942] hover:bg-[#E99A32] text-[#24211D] font-medium py-3 rounded-xl transition flex items-center justify-center gap-2">
               <Play size={16} /> Play Coding Match
             </button>
           </div>
 
-          <div className="bg-white border border-[#eeebf4] p-6 rounded-2xl flex flex-col justify-between shadow-sm hover:border-[#7559e8] transition">
+          <div className="bg-white border border-[#EDE6DA] p-6 rounded-2xl flex flex-col justify-between shadow-sm hover:border-[#F4B942] transition">
             <div>
-              <div className="size-12 rounded-xl bg-[#f0edff] text-[#7559e8] flex items-center justify-center mb-4"><BrainCircuit size={24} /></div>
-              <h3 className="text-lg font-bold text-[#302944]">Logical Reasoning</h3>
-              <p className="text-sm text-[#777187] mt-2">10 randomized pattern and deduction questions with interactive navigation.</p>
-              <div className="mt-4 text-xs font-semibold text-[#7559e8]">â±ï¸ 1 Min per Question Â· 10 Qs</div>
+              <div className="size-12 rounded-xl bg-[#FFF5E5] text-[#75451F] flex items-center justify-center mb-4"><BrainCircuit size={24} /></div>
+              <h3 className="text-lg font-bold text-[#24211D]">Logical Reasoning</h3>
+              <p className="text-sm text-[#6F675C] mt-2">10 randomized pattern and deduction questions with interactive navigation.</p>
+              <div className="mt-4 text-xs font-semibold text-[#75451F]">⏱️ 1 Min per Question · 10 Qs</div>
             </div>
-            <button onClick={() => startMatch("logical")} className="mt-6 w-full bg-[#7559e8] hover:bg-[#6849df] text-white font-medium py-3 rounded-xl transition flex items-center justify-center gap-2">
+            <button onClick={() => startMatch("logical")} className="mt-6 w-full bg-[#F4B942] hover:bg-[#E99A32] text-[#24211D] font-medium py-3 rounded-xl transition flex items-center justify-center gap-2">
               <Play size={16} /> Play Logical Match
             </button>
           </div>
 
-          <div className="bg-white border border-[#eeebf4] p-6 rounded-2xl flex flex-col justify-between shadow-sm hover:border-[#7559e8] transition">
+          <div className="bg-white border border-[#EDE6DA] p-6 rounded-2xl flex flex-col justify-between shadow-sm hover:border-[#F4B942] transition">
             <div>
-              <div className="size-12 rounded-xl bg-[#f0edff] text-[#7559e8] flex items-center justify-center mb-4"><HelpCircle size={24} /></div>
-              <h3 className="text-lg font-bold text-[#302944]">GK & Tech MCQs</h3>
-              <p className="text-sm text-[#777187] mt-2">10 randomized computer science and technology multiple-choice questions.</p>
-              <div className="mt-4 text-xs font-semibold text-[#7559e8]">â±ï¸ 30 Sec per Question Â· 10 Qs</div>
+              <div className="size-12 rounded-xl bg-[#FFF5E5] text-[#75451F] flex items-center justify-center mb-4"><HelpCircle size={24} /></div>
+              <h3 className="text-lg font-bold text-[#24211D]">GK & Tech MCQs</h3>
+              <p className="text-sm text-[#6F675C] mt-2">10 randomized computer science and technology multiple-choice questions.</p>
+              <div className="mt-4 text-xs font-semibold text-[#75451F]">⏱️ 30 Sec per Question · 10 Qs</div>
             </div>
-            <button onClick={() => startMatch("gk")} className="mt-6 w-full bg-[#7559e8] hover:bg-[#6849df] text-white font-medium py-3 rounded-xl transition flex items-center justify-center gap-2">
+            <button onClick={() => startMatch("gk")} className="mt-6 w-full bg-[#F4B942] hover:bg-[#E99A32] text-[#24211D] font-medium py-3 rounded-xl transition flex items-center justify-center gap-2">
               <Play size={16} /> Play MCQ Match
             </button>
           </div>
         </div>
       ) : matchOver ? (
-        <div className="max-w-lg mx-auto bg-white border border-[#eeebf4] p-8 rounded-2xl text-center shadow-lg space-y-6">
-          <Award className={`w-16 h-16 mx-auto ${matchResult === "win" ? "text-[#4aab72]" : "text-[#d9534f]"}`} />
-          <h2 className="text-2xl font-bold text-[#302944]">{matchResult === "win" ? "ðŸŽ‰ Victory! Match Won" : "âŒ Defeat! Match Lost"}</h2>
+        <div className="max-w-lg mx-auto bg-white border border-[#EDE6DA] p-8 rounded-2xl text-center shadow-lg space-y-6">
+          <Award className={`w-16 h-16 mx-auto ${matchResult === "win" ? "text-[#2E7D32]" : "text-[#C62828]"}`} />
+          <h2 className="text-2xl font-bold text-[#24211D]">{matchResult === "win" ? "🎉 Victory! Match Won" : "❌ Defeat! Match Lost"}</h2>
           
           {/* Calculated Score Breakdown Card */}
-          <div className="bg-[#faf9fc] p-4 rounded-xl border border-[#eeebf4] text-left space-y-2 text-sm">
-            <div className="flex justify-between font-semibold text-[#302944] border-b border-[#eeebf4] pb-2">
+          <div className="bg-[#FFFCF6] p-4 rounded-xl border border-[#EDE6DA] text-left space-y-2 text-sm">
+            <div className="flex justify-between font-semibold text-[#24211D] border-b border-[#EDE6DA] pb-2">
               <span>Performance Summary</span>
               <span>Score</span>
             </div>
-            <div className="flex justify-between text-[#777187]">
+            <div className="flex justify-between text-[#6F675C]">
               <span>{selectedMode === "coding" ? "Code Checks Passed:" : "Correct Answers:"}</span>
-              <span className="font-bold text-[#4aab72]">{correctCount} / {selectedMode === "coding" ? 1 : questionsList.length}</span>
+              <span className="font-bold text-[#2E7D32]">{correctCount} / {selectedMode === "coding" ? 1 : questionsList.length}</span>
             </div>
-            <div className="flex justify-between text-[#777187]">
+            <div className="flex justify-between text-[#6F675C]">
               <span>Your Calculated Total Score:</span>
-              <span className="font-bold text-[#674dd1]">{score}%</span>
+              <span className="font-bold text-[#75451F]">{score}%</span>
             </div>
-            <div className="flex justify-between text-[#777187]">
+            <div className="flex justify-between text-[#6F675C]">
               <span>Opponent Score:</span>
-              <span className="font-bold text-[#d9534f]">{opponentScore}%</span>
+              <span className="font-bold text-[#C62828]">{opponentScore}%</span>
             </div>
           </div>
 
-          <button onClick={() => setMatchStarted(false)} className="w-full bg-[#7559e8] hover:bg-[#6849df] text-white font-medium py-3 rounded-xl transition">
+          <button onClick={() => setMatchStarted(false)} className="w-full bg-[#F4B942] hover:bg-[#E99A32] text-[#24211D] font-medium py-3 rounded-xl transition">
             Back to Arena Lobby
           </button>
         </div>
       ) : isPaused ? (
-        <div className="max-w-md mx-auto bg-white border border-[#eeebf4] p-8 rounded-2xl text-center shadow-2xl">
-          <Pause className="w-16 h-16 text-[#f59e0b] mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-[#302944]">Match Paused</h2>
-          <p className="text-sm text-[#777187] mt-2">You pressed ESC. Choose whether to resume or cancel the match.</p>
+        <div className="max-w-md mx-auto bg-white border border-[#EDE6DA] p-8 rounded-2xl text-center shadow-2xl">
+          <Pause className="w-16 h-16 text-[#E99A32] mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-[#24211D]">Match Paused</h2>
+          <p className="text-sm text-[#6F675C] mt-2">You pressed ESC. Choose whether to resume or cancel the match.</p>
           <div className="mt-6 flex gap-3">
-            <button onClick={() => setIsPaused(false)} className="flex-1 bg-[#7559e8] hover:bg-[#6849df] text-white font-medium py-2.5 rounded-xl transition text-sm">
+            <button onClick={() => setIsPaused(false)} className="flex-1 bg-[#F4B942] hover:bg-[#E99A32] text-[#24211D] font-medium py-2.5 rounded-xl transition text-sm">
               Resume Match
             </button>
-            <button onClick={() => setMatchStarted(false)} className="flex-1 bg-[#fdf2f2] text-[#d9534f] border border-[#fde8e8] font-medium py-2.5 rounded-xl transition text-sm">
+            <button onClick={() => setMatchStarted(false)} className="flex-1 bg-[#FBEDEB] text-[#C62828] border border-[#F0D5D0] font-medium py-2.5 rounded-xl transition text-sm">
               Cancel Match
             </button>
           </div>
         </div>
       ) : (
-        <div className="bg-white border border-[#eeebf4] rounded-2xl p-6 shadow-sm">
-          <div className="flex justify-between items-center mb-6 border-b border-[#eeebf4] pb-4">
+        <div className="bg-white border border-[#EDE6DA] rounded-2xl p-6 shadow-sm">
+          <div className="flex justify-between items-center mb-6 border-b border-[#EDE6DA] pb-4">
             <div className="flex items-center gap-3">
-              <span className="bg-[#f0edff] text-[#674dd1] px-3 py-1 rounded-full text-xs font-semibold uppercase">
+              <span className="bg-[#FFF5E5] text-[#75451F] px-3 py-1 rounded-full text-xs font-semibold uppercase">
                 {selectedMode === "coding" ? "Coding Challenge (5 Mins)" : `Question ${currentQIndex + 1} of 10 (${selectedMode})`}
               </span>
-              <span className={`flex items-center gap-1.5 font-mono text-sm font-bold px-3 py-1 rounded-full border ${timeLeft === 0 ? "text-[#d9534f] bg-[#fdf2f2] border-[#fde8e8]" : "text-[#b7791f] bg-[#fffbeb] border-[#fef3c7]"}`}>
+              <span className={`flex items-center gap-1.5 font-mono text-sm font-bold px-3 py-1 rounded-full border ${timeLeft === 0 ? "text-[#C62828] bg-[#FBEDEB] border-[#F0D5D0]" : "text-[#75451F] bg-[#FFF5E5] border-[#F4B942]"}`}>
                 <Clock size={15} /> {Math.floor(timeLeft / 60)}:{("0" + (timeLeft % 60)).slice(-2)}
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <button onClick={() => finalizeMatch()} className="bg-[#4aab72] hover:bg-[#3d925f] text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition">
+              <button onClick={() => finalizeMatch()} className="bg-[#2E7D32] hover:bg-[#256428] text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition">
                 Submit Match Now
               </button>
-              <div className="flex items-center gap-2 text-xs font-semibold text-[#d9534f] bg-[#fdf2f2] px-3 py-1 rounded-full border border-[#fde8e8]">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[#C62828] bg-[#FBEDEB] px-3 py-1 rounded-full border border-[#F0D5D0]">
                 <ShieldAlert size={14} /> Screen Lock Active (Warning: {warnings}/2)
               </div>
             </div>
@@ -430,34 +430,34 @@ function GamesPage() {
 
           {selectedMode === "coding" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-[#faf9fc] p-6 rounded-xl border border-[#eeebf4] flex flex-col justify-between">
+              <div className="bg-[#FFFCF6] p-6 rounded-xl border border-[#EDE6DA] flex flex-col justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-[#302944] mb-2">{codingChallenge?.title ?? "Coding Challenge"}</h3>
-                  <p className="text-sm text-[#777187] leading-relaxed">
+                  <h3 className="text-base font-bold text-[#24211D] mb-2">{codingChallenge?.title ?? "Coding Challenge"}</h3>
+                  <p className="text-sm text-[#6F675C] leading-relaxed">
                     {codingChallenge?.problem}
                   </p>
                   {codingChallenge?.examples.map((example, index) => (
-                    <div key={index} className="mt-4 p-3 bg-white rounded-lg font-mono text-xs text-[#554f63] border border-[#eeebf4] whitespace-pre-wrap">{example}</div>
+                    <div key={index} className="mt-4 p-3 bg-white rounded-lg font-mono text-xs text-[#6F675C] border border-[#EDE6DA] whitespace-pre-wrap">{example}</div>
                   ))}
                 </div>
                 {aiFeedback && (
-                  <div className="mt-4 whitespace-pre-wrap p-4 bg-[#f0edff] border border-[#d8d0ff] rounded-xl text-xs text-[#5b3fd1]">
+                  <div className="mt-4 whitespace-pre-wrap p-4 bg-[#FFF5E5] border border-[#EDE6DA] rounded-xl text-xs text-[#75451F]">
                     <strong>Offline Code Review:</strong> {aiFeedback}
                   </div>
                 )}
               </div>
 
               <div className="flex flex-col">
-                <div className="text-xs font-semibold text-[#777187] mb-2">Code Editor Panel</div>
+                <div className="text-xs font-semibold text-[#6F675C] mb-2">Code Editor Panel</div>
                 <textarea
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="w-full h-64 bg-[#211b35] text-[#a5f3fc] font-mono text-sm p-4 rounded-xl border border-[#302944] focus:outline-none focus:border-[#7559e8] resize-none"
+                  className="w-full h-64 bg-[#24211D] text-[#F4B942] font-mono text-sm p-4 rounded-xl border border-[#24211D] focus:outline-none focus:border-[#F4B942] resize-none"
                 />
                 <button
                   disabled={evaluating}
                   onClick={submitCodeForAi}
-                  className="mt-4 w-full bg-[#7559e8] hover:bg-[#6849df] disabled:opacity-50 text-white font-medium py-3 rounded-xl transition flex items-center justify-center gap-2"
+                  className="mt-4 w-full bg-[#F4B942] hover:bg-[#E99A32] disabled:opacity-50 text-[#24211D] font-medium py-3 rounded-xl transition flex items-center justify-center gap-2"
                 >
                   {evaluating ? "Checking code structure..." : "Submit for Local Code Review"}
                 </button>
@@ -466,13 +466,13 @@ function GamesPage() {
           ) : (
             <div className="max-w-3xl mx-auto py-4 space-y-6">
               {/* Question palette */}
-              <div className="bg-[#faf9fc] p-4 rounded-xl border border-[#eeebf4]">
+              <div className="bg-[#FFFCF6] p-4 rounded-xl border border-[#EDE6DA]">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <div className="text-xs font-semibold text-[#777187]">Question Palette (timed-out questions are locked):</div>
-                  <div className="flex flex-wrap gap-3 text-[10px] font-medium text-[#777187]">
-                    <span className="flex items-center gap-1"><i className="size-2.5 rounded-sm bg-[#f2b84b]" /> In progress</span>
-                    <span className="flex items-center gap-1"><i className="size-2.5 rounded-sm bg-[#4aab72]" /> Answered</span>
-                    <span className="flex items-center gap-1"><i className="size-2.5 rounded-sm bg-[#d9534f]" /> Time expired</span>
+                  <div className="text-xs font-semibold text-[#6F675C]">Question Palette (timed-out questions are locked):</div>
+                  <div className="flex flex-wrap gap-3 text-[10px] font-medium text-[#6F675C]">
+                    <span className="flex items-center gap-1"><i className="size-2.5 rounded-sm bg-[#F4B942]" /> In progress</span>
+                    <span className="flex items-center gap-1"><i className="size-2.5 rounded-sm bg-[#2E7D32]" /> Answered</span>
+                    <span className="flex items-center gap-1"><i className="size-2.5 rounded-sm bg-[#C62828]" /> Time expired</span>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -489,13 +489,13 @@ function GamesPage() {
                         aria-label={`Question ${idx + 1}${isAnswered ? ", answered" : isTimedOut ? ", time expired and locked" : isVisited ? ", in progress" : ", not started"}`}
                         className={`size-9 rounded-lg font-bold text-xs flex items-center justify-center transition border disabled:cursor-not-allowed ${
                           isAnswered
-                            ? "bg-[#4aab72] text-white border-[#4aab72]"
+                            ? "bg-[#2E7D32] text-white border-[#2E7D32]"
                             : isTimedOut
-                              ? "bg-[#d9534f] text-white border-[#d9534f]"
+                              ? "bg-[#C62828] text-white border-[#C62828]"
                               : isVisited
-                                ? "bg-[#fffbeb] text-[#b7791f] border-[#f2b84b]"
-                                : "bg-white text-[#777187] border-[#eeebf4]"
-                        } ${isCurrent ? "ring-2 ring-[#7559e8]/35 ring-offset-2" : ""}`}
+                                ? "bg-[#FFF5E5] text-[#75451F] border-[#F4B942]"
+                                : "bg-white text-[#6F675C] border-[#EDE6DA]"
+                        } ${isCurrent ? "ring-2 ring-[#F4B942]/35 ring-offset-2" : ""}`}
                       >
                         {idx + 1}
                       </button>
@@ -506,9 +506,9 @@ function GamesPage() {
 
               {/* Question Box with Options Rendering Properly */}
               {questionsList[currentQIndex] ? (
-                <div className="bg-[#faf9fc] p-6 rounded-xl border border-[#eeebf4]">
-                  <div className="text-xs font-semibold text-[#674dd1] mb-1">Question {currentQIndex + 1} of {questionsList.length}</div>
-                  <h3 className="text-lg font-bold text-[#302944] mb-4">
+                <div className="bg-[#FFFCF6] p-6 rounded-xl border border-[#EDE6DA]">
+                  <div className="text-xs font-semibold text-[#75451F] mb-1">Question {currentQIndex + 1} of {questionsList.length}</div>
+                  <h3 className="text-lg font-bold text-[#24211D] mb-4">
                     {questionsList[currentQIndex].question}
                   </h3>
                   <div className="space-y-3">
@@ -520,11 +520,11 @@ function GamesPage() {
                           onClick={() => handleSelectOption(i)}
                           className={`w-full text-left p-4 rounded-xl transition text-sm font-medium border ${
                             isSelected
-                              ? "bg-[#f0edff] border-[#7559e8] text-[#674dd1] shadow-sm"
-                              : "bg-white border-[#eeebf4] text-[#302944] hover:border-[#7559e8]"
+                              ? "bg-[#FFF5E5] border-[#F4B942] text-[#75451F] shadow-sm"
+                              : "bg-white border-[#EDE6DA] text-[#24211D] hover:border-[#F4B942]"
                           }`}
                         >
-                          <span className="font-bold mr-2 text-[#7559e8]">{String.fromCharCode(65 + i)}.</span> {opt}
+                          <span className="font-bold mr-2 text-[#75451F]">{String.fromCharCode(65 + i)}.</span> {opt}
                         </button>
                       );
                     })}
@@ -538,13 +538,13 @@ function GamesPage() {
               <div className="flex gap-4">
                 <button
                   onClick={moveToNextQuestion}
-                  className="flex-1 bg-[#4aab72] hover:bg-[#3d925f] text-white font-medium py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-sm"
+                  className="flex-1 bg-[#2E7D32] hover:bg-[#256428] text-white font-medium py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Save size={16} /> Save Answer & Next
                 </button>
                 <button
                   onClick={moveToNextQuestion}
-                  className="flex-1 bg-[#7559e8] hover:bg-[#6849df] text-white font-medium py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-sm"
+                  className="flex-1 bg-[#F4B942] hover:bg-[#E99A32] text-[#24211D] font-medium py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-sm"
                 >
                   Skip Question <ArrowRight size={16} />
                 </button>

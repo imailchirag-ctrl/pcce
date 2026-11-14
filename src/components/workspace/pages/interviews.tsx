@@ -10,14 +10,18 @@ import {
   FileText,
   Loader2,
   MessageSquareText,
+  ScanFace,
+  ShieldCheck,
   Sparkles,
   Target,
+  Video,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge, Card, CardTitle, EmptyState } from "@/components/ui/primitives";
 import { Heading, Metric } from "@/components/workspace/shared";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useWorkspace } from "@/lib/workspace-provider";
+import { cn } from "@/lib/utils";
 
 export function InterviewsPage() {
   const router = useRouter();
@@ -69,6 +73,83 @@ export function InterviewsPage() {
           {errorMsg}
         </div>
       )}
+
+      {/* AI Video Interview — entry point for the proctored live session */}
+      <Card className="mb-5 overflow-hidden p-0">
+        <div className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[1.35fr_1fr] lg:items-center">
+          <div className="min-w-0">
+            <span className="eyebrow inline-flex items-center gap-2">
+              <span className="h-px w-5 bg-gradient-to-r from-[#E99A32] to-transparent" />
+              Live proctored session
+            </span>
+            <h2 className="font-display mt-1.5 text-xl font-bold tracking-tight text-[#24211D] sm:text-2xl">
+              AI Video Interview
+            </h2>
+            <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-[#6F675C]">
+              Face-to-face mock interview with spoken answers, AI-generated questions, and a live
+              integrity engine that watches head pose, eye gaze, and objects in frame.
+            </p>
+
+            <div className="mt-3.5 flex flex-wrap gap-1.5">
+              <Badge tone="primary">MediaPipe 3D face mesh</Badge>
+              <Badge tone="amber">YOLOv8 object detection</Badge>
+              <Badge tone="warm">OpenCV fallback</Badge>
+            </div>
+
+            <ul className="mt-4 space-y-1.5 text-xs text-[#6F675C]">
+              <li className="flex items-start gap-2">
+                <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[#2E7D32]" />
+                10–15 randomized questions read aloud, answered by voice, transcribed live.
+              </li>
+              <li className="flex items-start gap-2">
+                <ShieldCheck size={14} className="mt-0.5 shrink-0 text-[#75451F]" />
+                Head-turn, gaze-diversion, multi-person and phone-in-frame detection with an audit trail.
+              </li>
+            </ul>
+
+            <div className="mt-5 flex flex-wrap items-center gap-2.5">
+              <Link href="/interviews/video" className={cn(buttonVariants(), "gap-2")}>
+                <Video size={16} /> Start video interview
+              </Link>
+              <Link
+                href="/interviews/proctor"
+                className={cn(buttonVariants({ variant: "secondary" }), "gap-2")}
+              >
+                <ScanFace size={16} /> Open proctor view
+              </Link>
+            </div>
+          </div>
+
+          <div className="relative overflow-hidden rounded-2xl border border-[#EDE6DA] bg-[#24211D] p-4 shadow-[0_10px_30px_-16px_rgba(117,69,31,0.5)]">
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(circle at 25% 15%, rgba(244,185,66,0.22), transparent 60%)",
+              }}
+            />
+            <div className="relative flex aspect-[16/10] flex-col justify-between">
+              <div className="flex items-center justify-between text-[10px] font-semibold">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-0.5 text-[#F4B942]">
+                  <span className="live-dot size-1.5 rounded-full bg-[#E99A32]" /> PROCTORING
+                </span>
+                <span className="text-[#FFFCF6]/60">12 questions · ~25 min</span>
+              </div>
+
+              <div className="flex items-center justify-center">
+                <ScanFace size={62} className="text-[#F4B942]/45" strokeWidth={1.4} />
+              </div>
+
+              <div className="flex items-end justify-between text-[10px]">
+                <span className="text-[#FFFCF6]/55">Face · Gaze · Objects</span>
+                <span className="rounded-full bg-[#F4B942]/15 px-2 py-0.5 font-semibold text-[#F4B942]">
+                  Integrity 100%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* 3 Metric Cards */}
       <div className="grid gap-4 sm:grid-cols-3">

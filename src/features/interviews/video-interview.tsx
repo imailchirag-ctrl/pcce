@@ -414,20 +414,20 @@ function AIAvatar({ speaking, role }: { speaking: boolean; role: string }) {
   return (
     <div className="flex flex-col items-center gap-2.5">
       <div
-        className={`relative grid size-16 place-items-center rounded-2xl bg-gradient-to-tr from-[#7257df] to-[#9d8bf0] text-white shadow-md transition-all duration-300 ${
-          speaking ? "ring-4 ring-[#8066e9]/40 scale-105" : ""
+        className={`relative grid size-16 place-items-center rounded-2xl bg-gradient-to-tr from-[#F4B942] to-[#E99A32] text-[#24211D] shadow-md transition-all duration-300 ${
+          speaking ? "ring-4 ring-[#F4B942]/40 scale-105" : ""
         }`}
       >
         <span className="text-2xl">🤖</span>
         {speaking && (
-          <span className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full bg-[#38a169] text-[9px] font-bold text-white animate-pulse">
+          <span className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full bg-[#2E7D32] text-[9px] font-bold text-white animate-pulse">
             ●
           </span>
         )}
       </div>
       <div className="text-center">
-        <p className="text-xs font-semibold text-[#2d2640]">AI Interviewer</p>
-        <p className="text-[10px] text-[#8f88a0]">Role: {role} · Proctored</p>
+        <p className="text-xs font-semibold text-[#24211D]">AI Interviewer</p>
+        <p className="text-[10px] text-[#6F675C]">Role: {role} · Proctored</p>
       </div>
     </div>
   );
@@ -997,38 +997,38 @@ export function VideoInterview({
     return (
       <div className="mx-auto max-w-3xl">
         {onBack && (
-          <button onClick={onBack} className="mb-4 inline-flex items-center gap-1 text-xs font-semibold text-[#7158d5]">
+          <button onClick={onBack} className="mb-4 inline-flex items-center gap-1 text-xs font-semibold text-[#75451F]">
             <ChevronLeft size={15} /> Back to interviews
           </button>
         )}
-        <div className="rounded-3xl border border-[#eeeaf4] bg-white p-6 shadow-sm sm:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#f1edf8] pb-5">
+        <div className="rounded-2xl border border-[#EDE6DA] bg-white p-6 shadow-sm sm:p-8">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#EDE6DA] pb-5">
             <div className="flex items-center gap-3">
-              <span className="grid size-12 place-items-center rounded-2xl bg-[#f0edff] text-[#7258dc] shadow-sm">
+              <span className="grid size-12 place-items-center rounded-2xl bg-[#FFF5E5] text-[#75451F] shadow-sm">
                 <Video size={24} />
               </span>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-semibold text-[#2d2640]">AI Video Interview & Proctoring</h1>
-                  <span className="rounded-full bg-[#f2efff] px-2.5 py-0.5 text-[10px] font-semibold text-[#6e54d5]">
+                  <h1 className="text-xl font-semibold text-[#24211D]">AI Video Interview & Proctoring</h1>
+                  <span className="rounded-full bg-[#FFF5E5] px-2.5 py-0.5 text-[10px] font-semibold text-[#75451F]">
                     Voice Answering · AI Audio TTS
                   </span>
                 </div>
-                <p className="mt-0.5 text-xs text-[#8f88a0]">Topic: {activeTopic} · {questionCount} Random Practice Questions</p>
+                <p className="mt-0.5 text-xs text-[#6F675C]">Topic: {activeTopic} · {questionCount} Random Practice Questions</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 rounded-xl bg-[#faf9fd] px-3 py-1.5 text-[11px] font-medium text-[#645c75]">
-              <ShieldCheck size={14} className="text-[#38a169]" /> AI Integrity Engine Active
+            <div className="flex items-center gap-2 rounded-xl bg-[#FFFCF6] px-3 py-1.5 text-[11px] font-medium text-[#6F675C]">
+              <ShieldCheck size={14} className="text-[#2E7D32]" /> AI Integrity Engine Active
             </div>
           </div>
 
           {/* 1. Choose Interview Topic */}
           <div className="mt-6">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#9b94a0]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#6F675C]">
                 1. Select Interview Topic / Role
               </p>
-              <span className="text-[10px] text-[#7258dc] font-semibold">Active: {activeTopic}</span>
+              <span className="text-[10px] text-[#75451F] font-semibold">Active: {activeTopic}</span>
             </div>
             <div className="mt-2.5 grid gap-2 sm:grid-cols-3">
               {TOPIC_OPTIONS.map((t) => {
@@ -1040,16 +1040,16 @@ export function VideoInterview({
                     onClick={() => setActiveTopic(t.id)}
                     className={`flex items-start gap-2.5 rounded-2xl border p-3 text-left transition ${
                       isSelected
-                        ? "border-[#7257df] bg-[#f7f5ff] ring-2 ring-[#7257df]/30"
-                        : "border-[#f0edf7] bg-[#fbfaff] hover:border-[#ded6f8]"
+                        ? "border-[#F4B942] bg-[#FFF5E5] ring-2 ring-[#F4B942]/30"
+                        : "border-[#EDE6DA] bg-[#FFFCF6] hover:border-[#EDE6DA]"
                     }`}
                   >
                     <span className="text-xl">{t.icon}</span>
                     <div className="min-w-0 flex-1">
-                      <p className={`text-xs font-semibold ${isSelected ? "text-[#583fce]" : "text-[#2d2640]"}`}>
+                      <p className={`text-xs font-semibold ${isSelected ? "text-[#75451F]" : "text-[#24211D]"}`}>
                         {t.label}
                       </p>
-                      <p className="mt-0.5 text-[10px] leading-3 text-[#8a829a] line-clamp-1">{t.tag}</p>
+                      <p className="mt-0.5 text-[10px] leading-3 text-[#6F675C] line-clamp-1">{t.tag}</p>
                     </div>
                   </button>
                 );
@@ -1059,7 +1059,7 @@ export function VideoInterview({
 
           {/* 2. Choose Question Count (10-15 Questions) */}
           <div className="mt-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#9b94a0]">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#6F675C]">
               2. Number of Practice Questions (10–15 Questions)
             </p>
             <div className="mt-2.5 flex flex-wrap gap-2.5">
@@ -1070,8 +1070,8 @@ export function VideoInterview({
                   onClick={() => setQuestionCount(cnt)}
                   className={`rounded-xl px-4 py-2 text-xs font-semibold transition ${
                     questionCount === cnt
-                      ? "bg-[#7257df] text-white shadow-sm ring-2 ring-[#7257df]/30"
-                      : "border border-[#e6e1f0] bg-white text-[#5d5671] hover:bg-[#f8f7fd]"
+                      ? "bg-[#F4B942] text-[#24211D] shadow-sm ring-2 ring-[#F4B942]/30"
+                      : "border border-[#EDE6DA] bg-white text-[#6F675C] hover:bg-[#FFF5E5]"
                   }`}
                 >
                   {cnt} Questions {cnt === 12 ? "(Standard)" : cnt === 15 ? "(Comprehensive)" : "(Quick)"}
@@ -1081,12 +1081,12 @@ export function VideoInterview({
           </div>
 
           {/* Voice-First Protocol Notice */}
-          <div className="mt-5 rounded-2xl border border-purple-200 bg-gradient-to-r from-purple-50 via-[#faf9fe] to-purple-50 p-3.5">
+          <div className="mt-5 rounded-2xl border border-[#EDE6DA] bg-gradient-to-r from-[#FFF5E5] via-[#FFFCF6] to-[#FFF5E5] p-3.5">
             <div className="flex items-start gap-2.5">
-              <Mic size={18} className="mt-0.5 shrink-0 text-[#7257df] animate-pulse" />
-              <div className="text-xs leading-relaxed text-[#3b334d]">
-                <p className="font-semibold text-[#2d2640]">Voice-Only Answering Protocol</p>
-                <p className="mt-0.5 text-[11px] text-[#6d647e]">
+              <Mic size={18} className="mt-0.5 shrink-0 text-[#75451F] animate-pulse" />
+              <div className="text-xs leading-relaxed text-[#24211D]">
+                <p className="font-semibold text-[#24211D]">Voice-Only Answering Protocol</p>
+                <p className="mt-0.5 text-[11px] text-[#6F675C]">
                   1. The AI Interviewer reads each question aloud using Text-to-Speech.<br />
                   2. <strong>Your microphone activates automatically</strong> as soon as the question reading finishes.<br />
                   3. Answer solely in voice (text chat typing is disabled). Words are transcribed in real time.
@@ -1096,7 +1096,7 @@ export function VideoInterview({
           </div>
 
           <div className="mt-6">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#9b94a0]">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#6F675C]">
               5 Core Anti-Cheat Proctoring Rules (Active in Background)
             </p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -1144,16 +1144,16 @@ export function VideoInterview({
                   engine: "Event Engine",
                 },
               ].map((item) => (
-                <div key={item.id} className="flex items-start gap-3 rounded-2xl border border-[#f0edf7] bg-[#fbfaff] p-3.5">
-                  <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-white text-[#7258dc] shadow-sm">
+                <div key={item.id} className="flex items-start gap-3 rounded-2xl border border-[#EDE6DA] bg-[#FFFCF6] p-3.5">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-white text-[#75451F] shadow-sm">
                     <item.icon size={16} />
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-semibold text-[#2d2640]">{item.title}</p>
-                      <span className="text-[9px] font-medium text-[#9a91ab]">{item.engine}</span>
+                      <p className="text-xs font-semibold text-[#24211D]">{item.title}</p>
+                      <span className="text-[9px] font-medium text-[#6F675C]">{item.engine}</span>
                     </div>
-                    <p className="mt-1 text-[11px] leading-4 text-[#7b748d]">{item.desc}</p>
+                    <p className="mt-1 text-[11px] leading-4 text-[#6F675C]">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -1161,7 +1161,7 @@ export function VideoInterview({
           </div>
 
           {cameraError && (
-            <div className="mt-5 flex items-start gap-2.5 rounded-2xl border border-[#f3d9d5] bg-[#fff7f5] p-3.5 text-xs text-[#a35248]">
+            <div className="mt-5 flex items-start gap-2.5 rounded-2xl border border-[#F0D5D0] bg-[#FBEDEB] p-3.5 text-xs text-[#C62828]">
               <AlertCircle size={16} className="mt-0.5 shrink-0" />
               <span>{cameraError}</span>
             </div>
@@ -1171,7 +1171,7 @@ export function VideoInterview({
             <button
               onClick={() => void beginInterview()}
               disabled={loadingQuestions}
-              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#7257df] py-3 text-sm font-semibold text-white shadow-md hover:bg-[#6349ce] disabled:opacity-60"
+              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#F4B942] py-3 text-sm font-semibold text-[#24211D] shadow-md hover:bg-[#E99A32] disabled:opacity-60"
             >
               {loadingQuestions ? (
                 <>
@@ -1185,12 +1185,12 @@ export function VideoInterview({
             </button>
             <button
               onClick={() => void startCamera()}
-              className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-[#eeeaf4] px-4 py-3 text-xs font-semibold text-[#746d85] hover:bg-[#faf9fc]"
+              className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-[#EDE6DA] px-4 py-3 text-xs font-semibold text-[#6F675C] hover:bg-[#FFFCF6]"
             >
               <Camera size={14} /> Test Webcam
             </button>
           </div>
-          <p className="mt-3 text-center text-[10px] text-[#9b94a8]">
+          <p className="mt-3 text-center text-[10px] text-[#6F675C]">
             Proctoring events generate alerts for review. 3 strikes on multiple faces will terminate with -25% marking.
           </p>
         </div>
@@ -1203,12 +1203,12 @@ export function VideoInterview({
   if (phase === "countdown") {
     return (
       <div className="flex flex-col items-center justify-center gap-6 py-24">
-        <div className="grid size-24 place-items-center rounded-3xl bg-gradient-to-tr from-[#7257df] to-[#9d8bf0] text-5xl font-bold text-white shadow-lg animate-pulse">
+        <div className="grid size-24 place-items-center rounded-2xl bg-gradient-to-tr from-[#F4B942] to-[#E99A32] text-5xl font-bold text-[#24211D] shadow-lg animate-pulse">
           {countdown > 0 ? countdown : "GO"}
         </div>
         <div className="text-center">
-          <p className="text-base font-semibold text-[#2d2640]">Connecting with AI Interviewer…</p>
-          <p className="mt-1 text-xs text-[#8f88a0]">Initializing MediaPipe face mesh and YOLO detection</p>
+          <p className="text-base font-semibold text-[#24211D]">Connecting with AI Interviewer…</p>
+          <p className="mt-1 text-xs text-[#6F675C]">Initializing MediaPipe face mesh and YOLO detection</p>
         </div>
       </div>
     );
@@ -1228,8 +1228,8 @@ export function VideoInterview({
 
     return (
       <div className="mx-auto max-w-3xl space-y-5">
-        <div className="rounded-3xl border-2 border-red-500/80 bg-gradient-to-b from-[#2a0c0c] to-[#140606] p-8 text-center text-white shadow-2xl">
-          <span className="mx-auto grid size-20 place-items-center rounded-3xl bg-red-600/90 text-white shadow-xl ring-8 ring-red-500/20 animate-pulse">
+        <div className="rounded-2xl border-2 border-red-500/80 bg-gradient-to-b from-[#2a0c0c] to-[#140606] p-8 text-center text-white shadow-2xl">
+          <span className="mx-auto grid size-20 place-items-center rounded-2xl bg-red-600/90 text-white shadow-xl ring-8 ring-red-500/20 animate-pulse">
             <Ban size={42} />
           </span>
 
@@ -1328,22 +1328,22 @@ export function VideoInterview({
 
     return (
       <div className="mx-auto max-w-4xl space-y-5">
-        <div className="rounded-3xl border border-[#eeeaf4] bg-white p-7 text-center shadow-sm">
+        <div className="rounded-2xl border border-[#EDE6DA] bg-white p-7 text-center shadow-sm">
           <div className="flex flex-wrap items-center justify-center gap-6">
             <div>
-              <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-[#f0edff] text-[#7258dc]">
+              <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-[#FFF5E5] text-[#75451F]">
                 <Award size={24} />
               </span>
-              <p className="mt-2 text-xs font-medium text-[#8f88a0]">Interview Score</p>
-              <p className="text-4xl font-bold text-[#2d2640]">{avgScore}%</p>
+              <p className="mt-2 text-xs font-medium text-[#6F675C]">Interview Score</p>
+              <p className="text-4xl font-bold text-[#24211D]">{avgScore}%</p>
             </div>
-            <div className="h-16 w-px bg-[#eeeaf4]" />
+            <div className="h-16 w-px bg-[#EDE6DA]" />
             <div>
-              <span className={`mx-auto grid size-12 place-items-center rounded-2xl ${finalIntegrity >= 85 ? "bg-[#eaf7ef] text-[#3f8b60]" : "bg-[#fff4f0] text-[#c05a40]"}`}>
+              <span className={`mx-auto grid size-12 place-items-center rounded-2xl ${finalIntegrity >= 85 ? "bg-[#E9F5EC] text-[#2E7D32]" : "bg-[#FBEDEB] text-[#C62828]"}`}>
                 <Shield size={24} />
               </span>
-              <p className="mt-2 text-xs font-medium text-[#8f88a0]">Proctoring Integrity</p>
-              <p className={`text-4xl font-bold ${finalIntegrity >= 85 ? "text-[#3f8b60]" : "text-[#c05a40]"}`}>
+              <p className="mt-2 text-xs font-medium text-[#6F675C]">Proctoring Integrity</p>
+              <p className={`text-4xl font-bold ${finalIntegrity >= 85 ? "text-[#2E7D32]" : "text-[#C62828]"}`}>
                 {finalIntegrity}%
               </p>
             </div>
@@ -1351,11 +1351,11 @@ export function VideoInterview({
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
             {finalIntegrity >= 85 ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d1f0de] bg-[#f1fbf5] px-3 py-1 text-xs font-semibold text-[#3f8b60]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#CDEBD6] bg-[#E9F5EC] px-3 py-1 text-xs font-semibold text-[#2E7D32]">
                 <ShieldCheck size={14} /> Verified High Integrity Session
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#f8d7c8] bg-[#fff4f0] px-3 py-1 text-xs font-semibold text-[#c05a40]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#F0D5D0] bg-[#FBEDEB] px-3 py-1 text-xs font-semibold text-[#C62828]">
                 <ShieldAlert size={14} /> Requires Proctor Review ({allSessionEvents.length} events flagged)
               </span>
             )}
@@ -1363,13 +1363,13 @@ export function VideoInterview({
         </div>
 
         {/* Proctoring Rules Audit Log */}
-        <div className="rounded-3xl border border-[#eeeaf4] bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between border-b border-[#f0edf7] pb-4">
+        <div className="rounded-2xl border border-[#EDE6DA] bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between border-b border-[#EDE6DA] pb-4">
             <div>
-              <h2 className="text-sm font-semibold text-[#2d2640]">Proctoring Audit Summary</h2>
-              <p className="text-[11px] text-[#8f88a0]">Results across 5 AI anti-cheat rules during this video session</p>
+              <h2 className="text-sm font-semibold text-[#24211D]">Proctoring Audit Summary</h2>
+              <p className="text-[11px] text-[#6F675C]">Results across 5 AI anti-cheat rules during this video session</p>
             </div>
-            <span className="text-xs font-semibold text-[#7158d5]">{allSessionEvents.length} events logged</span>
+            <span className="text-xs font-semibold text-[#75451F]">{allSessionEvents.length} events logged</span>
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-5">
@@ -1400,12 +1400,12 @@ export function VideoInterview({
                 icon: Smartphone,
               },
             ].map((rule) => (
-              <div key={rule.name} className="rounded-2xl border border-[#f0edf7] bg-[#faf9fd] p-3 text-center">
-                <span className={`mx-auto grid size-7 place-items-center rounded-lg ${rule.pass ? "bg-[#eaf7ef] text-[#3f8b60]" : "bg-[#fff4f0] text-[#c05a40]"}`}>
+              <div key={rule.name} className="rounded-2xl border border-[#EDE6DA] bg-[#FFFCF6] p-3 text-center">
+                <span className={`mx-auto grid size-7 place-items-center rounded-lg ${rule.pass ? "bg-[#E9F5EC] text-[#2E7D32]" : "bg-[#FBEDEB] text-[#C62828]"}`}>
                   <rule.icon size={13} />
                 </span>
-                <p className="mt-2 text-[11px] font-semibold text-[#2d2640]">{rule.name}</p>
-                <span className={`mt-1 inline-block text-[10px] font-bold ${rule.pass ? "text-[#3f8b60]" : "text-[#c05a40]"}`}>
+                <p className="mt-2 text-[11px] font-semibold text-[#24211D]">{rule.name}</p>
+                <span className={`mt-1 inline-block text-[10px] font-bold ${rule.pass ? "text-[#2E7D32]" : "text-[#C62828]"}`}>
                   {rule.pass ? "CLEAN" : "FLAGGED"}
                 </span>
               </div>
@@ -1415,19 +1415,19 @@ export function VideoInterview({
           {/* Detailed timeline if any */}
           {allSessionEvents.length > 0 && (
             <div className="mt-5">
-              <p className="text-xs font-semibold text-[#2d2640]">Flagged Events Timeline</p>
+              <p className="text-xs font-semibold text-[#24211D]">Flagged Events Timeline</p>
               <div className="mt-2 space-y-2">
                 {allSessionEvents.map((ev, i) => (
-                  <div key={i} className="flex items-center justify-between rounded-xl border border-[#f0edf7] bg-[#fbfaff] p-3 text-xs">
+                  <div key={i} className="flex items-center justify-between rounded-xl border border-[#EDE6DA] bg-[#FFFCF6] p-3 text-xs">
                     <div className="flex items-center gap-2.5">
                       <span className={`rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase ${
-                        ev.severity === "HIGH" ? "bg-red-100 text-red-700" : ev.severity === "MEDIUM" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"
+                        ev.severity === "HIGH" ? "bg-red-100 text-red-700" : ev.severity === "MEDIUM" ? "bg-amber-100 text-amber-700" : "bg-[#FFF5E5] text-[#75451F]"
                       }`}>
                         {ev.severity}
                       </span>
-                      <span className="font-medium text-[#2d2640]">{ev.description}</span>
+                      <span className="font-medium text-[#24211D]">{ev.description}</span>
                     </div>
-                    <span className="text-[11px] text-[#8f88a0]">
+                    <span className="text-[11px] text-[#6F675C]">
                       {ev.started_at ? `${ev.started_at} · ` : ""}
                       {ev.duration_seconds ? `${ev.duration_seconds}s duration` : "recorded"}
                     </span>
@@ -1440,28 +1440,28 @@ export function VideoInterview({
 
         {/* Answers scored */}
         <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#9b94a0]">Interview Answers & Evaluations</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#6F675C]">Interview Answers & Evaluations</p>
           {answers.map((record, i) => (
-            <div key={i} className="rounded-2xl border border-[#eeeaf4] bg-white p-5 shadow-sm">
+            <div key={i} className="rounded-2xl border border-[#EDE6DA] bg-white p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3">
-                <p className="text-xs font-semibold text-[#2d2640]">
+                <p className="text-xs font-semibold text-[#24211D]">
                   Q{i + 1}: {record.question.prompt}
                 </p>
-                <span className="shrink-0 rounded-lg bg-[#f0edff] px-2.5 py-1 text-xs font-bold text-[#7258dc]">
+                <span className="shrink-0 rounded-lg bg-[#FFF5E5] px-2.5 py-1 text-xs font-bold text-[#75451F]">
                   {record.evaluation.overall}%
                 </span>
               </div>
-              <p className="mt-2.5 text-xs leading-5 text-[#6f687e]">{record.answer}</p>
+              <p className="mt-2.5 text-xs leading-5 text-[#6F675C]">{record.answer}</p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {record.evaluation.strengths.slice(0, 1).map((s, si) => (
-                  <div key={si} className="rounded-xl border border-[#e7f2ea] bg-[#fbfefc] p-2.5 text-[11px] text-[#3f8b60]">
-                    <CheckCircle2 size={13} className="mb-1 inline-block mr-1 text-[#47976a]" />
+                  <div key={si} className="rounded-xl border border-[#E9F5EC] bg-[#fbfefc] p-2.5 text-[11px] text-[#2E7D32]">
+                    <CheckCircle2 size={13} className="mb-1 inline-block mr-1 text-[#2E7D32]" />
                     {s}
                   </div>
                 ))}
                 {record.evaluation.improvements.slice(0, 1).map((imp, ii) => (
-                  <div key={ii} className="rounded-xl border border-[#f6ead8] bg-[#fffdf9] p-2.5 text-[11px] text-[#b27b39]">
-                    <AlertCircle size={13} className="mb-1 inline-block mr-1 text-[#b27b39]" />
+                  <div key={ii} className="rounded-xl border border-[#FFF5E5] bg-[#FFFCF6] p-2.5 text-[11px] text-[#75451F]">
+                    <AlertCircle size={13} className="mb-1 inline-block mr-1 text-[#75451F]" />
                     {imp}
                   </div>
                 ))}
@@ -1473,7 +1473,7 @@ export function VideoInterview({
         {onBack && (
           <button
             onClick={onBack}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#eeeaf4] py-3 text-sm font-semibold text-[#7158d5] hover:bg-[#faf9fc]"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#EDE6DA] py-3 text-sm font-semibold text-[#75451F] hover:bg-[#FFFCF6]"
           >
             <ChevronLeft size={16} /> Return to Interviews
           </button>
@@ -1499,7 +1499,7 @@ export function VideoInterview({
           {onBack && (
             <button
               onClick={onBack}
-              className="grid size-8 place-items-center rounded-xl border border-[#eeeaf4] bg-white text-[#746d85] hover:bg-[#faf9fc]"
+              className="grid size-8 place-items-center rounded-xl border border-[#EDE6DA] bg-white text-[#6F675C] hover:bg-[#FFFCF6]"
               title="Leave Call"
             >
               <ChevronLeft size={15} />
@@ -1507,10 +1507,10 @@ export function VideoInterview({
           )}
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold text-[#2d2640]">AI Video Interview · {activeTopic}</h2>
+              <h2 className="text-sm font-semibold text-[#24211D]">AI Video Interview · {activeTopic}</h2>
               <span className="size-2 rounded-full bg-red-500 animate-ping" />
             </div>
-            <p className="text-[10px] text-[#8f88a0]">
+            <p className="text-[10px] text-[#6F675C]">
               Question {currentQ + 1} of {questions.length} · Voice Answering Active
             </p>
           </div>
@@ -1521,10 +1521,10 @@ export function VideoInterview({
           {/* Launcher for Interviewer Live Monitor */}
           <button
             onClick={() => window.open(`/interviews/proctor?session=${sessionId}`, "_blank", "width=1320,height=880")}
-            className="inline-flex items-center gap-1.5 rounded-full border border-[#8066e9]/40 bg-[#f7f5ff] px-3.5 py-1 text-[11px] font-semibold text-[#6d53d3] shadow-sm hover:bg-[#eeeaff]"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[#F4B942]/40 bg-[#FFF5E5] px-3.5 py-1 text-[11px] font-semibold text-[#75451F] shadow-sm hover:bg-[#EDE6DA]"
             title="Open Remote Interviewer Live Monitoring View"
           >
-            <Radio size={13} className="text-[#8066e9] animate-pulse" />
+            <Radio size={13} className="text-[#75451F] animate-pulse" />
             Interviewer Live View ↗
           </button>
 
@@ -1536,7 +1536,7 @@ export function VideoInterview({
               ? "border-amber-400 bg-amber-50 text-amber-700 animate-pulse"
               : strikes === 1
               ? "border-yellow-400 bg-yellow-50 text-yellow-700"
-              : "border-[#eeeaf4] bg-white text-[#2d2640]"
+              : "border-[#EDE6DA] bg-white text-[#24211D]"
           }`}>
             <ShieldAlert size={12} />
             <span className="text-[11px] font-semibold">
@@ -1545,20 +1545,20 @@ export function VideoInterview({
           </div>
 
           {/* Integrity Score */}
-          <div className="flex items-center gap-1.5 rounded-full border border-[#eeeaf4] bg-white px-3 py-1 shadow-sm">
-            <Shield size={12} className={antiCheatData?.integrity_score && antiCheatData.integrity_score < 80 ? "text-[#c05a40]" : "text-[#3f8b60]"} />
-            <span className="text-[11px] font-semibold text-[#2d2640]">
+          <div className="flex items-center gap-1.5 rounded-full border border-[#EDE6DA] bg-white px-3 py-1 shadow-sm">
+            <Shield size={12} className={antiCheatData?.integrity_score && antiCheatData.integrity_score < 80 ? "text-[#C62828]" : "text-[#2E7D32]"} />
+            <span className="text-[11px] font-semibold text-[#24211D]">
               Integrity {antiCheatData?.integrity_score ?? 100}%
             </span>
           </div>
 
           {/* Active Alert Badge */}
           {antiCheatData?.alert ? (
-            <span className="inline-flex animate-pulse items-center gap-1.5 rounded-full border border-[#f8d7c8] bg-[#fff4f0] px-3 py-1 text-[11px] font-semibold text-[#c05a40]">
+            <span className="inline-flex animate-pulse items-center gap-1.5 rounded-full border border-[#F0D5D0] bg-[#FBEDEB] px-3 py-1 text-[11px] font-semibold text-[#C62828]">
               <ShieldAlert size={12} /> {antiCheatData.message || "Proctoring Alert"}
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d1f0de] bg-[#f1fbf5] px-3 py-1 text-[11px] font-semibold text-[#3f8b60]">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#CDEBD6] bg-[#E9F5EC] px-3 py-1 text-[11px] font-semibold text-[#2E7D32]">
               <ShieldCheck size={12} /> Single Face Verified
             </span>
           )}
@@ -1566,9 +1566,9 @@ export function VideoInterview({
       </div>
 
       {/* Progress Line */}
-      <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-[#f0edf5]">
+      <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-[#EDE6DA]">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-[#7257df] to-[#9d8bf0] transition-all duration-500"
+          className="h-full rounded-full bg-gradient-to-r from-[#F4B942] to-[#E99A32] transition-all duration-500"
           style={{ width: `${progressPct}%` }}
         />
       </div>
@@ -1578,7 +1578,7 @@ export function VideoInterview({
         {/* Left Column: Video Feeds & Live Proctoring HUD */}
         <div className="space-y-3">
           {/* Candidate Webcam Feed with Modernized Futuristic Cyber HUD */}
-          <div className="relative overflow-hidden rounded-3xl border border-[#2e2a42] bg-[#0c0a14] shadow-2xl" style={{ aspectRatio: "4/3" }}>
+          <div className="relative overflow-hidden rounded-2xl border border-[#24211D] bg-[#0c0a14] shadow-2xl" style={{ aspectRatio: "4/3" }}>
             <video
               ref={videoRef}
               autoPlay
@@ -1594,10 +1594,10 @@ export function VideoInterview({
               <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60" />
 
               {/* Glowing Corner Brackets */}
-              <div className="absolute top-3.5 left-3.5 h-6 w-6 border-l-2 border-t-2 border-[#8066e9]/90 shadow-[0_0_8px_#8066e9]" />
-              <div className="absolute top-3.5 right-3.5 h-6 w-6 border-r-2 border-t-2 border-[#8066e9]/90 shadow-[0_0_8px_#8066e9]" />
-              <div className="absolute bottom-3.5 left-3.5 h-6 w-6 border-l-2 border-b-2 border-[#8066e9]/90 shadow-[0_0_8px_#8066e9]" />
-              <div className="absolute bottom-3.5 right-3.5 h-6 w-6 border-r-2 border-b-2 border-[#8066e9]/90 shadow-[0_0_8px_#8066e9]" />
+              <div className="absolute top-3.5 left-3.5 h-6 w-6 border-l-2 border-t-2 border-[#F4B942]/90 shadow-[0_0_8px_#F4B942]" />
+              <div className="absolute top-3.5 right-3.5 h-6 w-6 border-r-2 border-t-2 border-[#F4B942]/90 shadow-[0_0_8px_#F4B942]" />
+              <div className="absolute bottom-3.5 left-3.5 h-6 w-6 border-l-2 border-b-2 border-[#F4B942]/90 shadow-[0_0_8px_#F4B942]" />
+              <div className="absolute bottom-3.5 right-3.5 h-6 w-6 border-r-2 border-b-2 border-[#F4B942]/90 shadow-[0_0_8px_#F4B942]" />
 
               {/* Cyber HUD Model Badges Top Left */}
               <div className="absolute top-4 left-5 flex flex-wrap items-center gap-1.5">
@@ -1605,10 +1605,10 @@ export function VideoInterview({
                   <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   CLAHE ILLUMINATION
                 </span>
-                <span className="rounded-md bg-black/60 px-2 py-0.5 font-mono text-[9px] font-semibold text-sky-400 backdrop-blur-md">
+                <span className="rounded-md bg-black/60 px-2 py-0.5 font-mono text-[9px] font-semibold text-[#F4B942] backdrop-blur-md">
                   MediaPipe 3D Mesh
                 </span>
-                <span className="rounded-md bg-black/60 px-2 py-0.5 font-mono text-[9px] font-semibold text-purple-300 backdrop-blur-md">
+                <span className="rounded-md bg-black/60 px-2 py-0.5 font-mono text-[9px] font-semibold text-[#F4B942] backdrop-blur-md">
                   YOLOv8 CPU
                 </span>
               </div>
@@ -1640,7 +1640,7 @@ export function VideoInterview({
                         cx={mx}
                         cy={my}
                         r={1.8}
-                        fill="#38bdf8"
+                        fill="#F4B942"
                       />
                     ))}
                   </g>
@@ -1649,7 +1649,7 @@ export function VideoInterview({
                 {/* Faces Bounding Boxes with Sci-Fi Glowing Reticles */}
                 {boxes.faces.map((f, idx) => {
                   const isBad = f.status === "flagged" || !f.is_primary;
-                  const color = isBad ? "#ef4444" : "#10b981";
+                  const color = isBad ? "#ef4444" : "#2E7D32";
                   const glow = isBad ? "drop-shadow(0 0 6px rgba(239,68,68,0.75))" : "drop-shadow(0 0 6px rgba(16,185,129,0.75))";
                   return (
                     <g key={`face-${idx}`} style={{ filter: glow }}>
@@ -1728,7 +1728,7 @@ export function VideoInterview({
                         width={w}
                         height={h}
                         fill="none"
-                        stroke="#f97316"
+                        stroke="#E99A32"
                         strokeWidth={2.5}
                         rx={6}
                       />
@@ -1737,7 +1737,7 @@ export function VideoInterview({
                         y={Math.max(0, y1 - 22)}
                         width={Math.max(140, w)}
                         height={20}
-                        fill="#f97316"
+                        fill="#E99A32"
                         opacity={0.94}
                         rx={4}
                       />
@@ -1760,8 +1760,8 @@ export function VideoInterview({
             {/* Camera Off Overlay */}
             {!cameraOn && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white z-20">
-                <CameraOff size={32} className="text-[#8f88a0]" />
-                <p className="text-xs text-[#8f88a0]">Webcam feed disabled</p>
+                <CameraOff size={32} className="text-[#6F675C]" />
+                <p className="text-xs text-[#6F675C]">Webcam feed disabled</p>
               </div>
             )}
 
@@ -1802,15 +1802,15 @@ export function VideoInterview({
 
             {/* Proctor Message Toast Overlay */}
             {proctorToast && (
-              <div className="absolute bottom-16 left-4 right-4 rounded-2xl bg-purple-950/95 border border-purple-500/60 p-3 text-white shadow-2xl backdrop-blur-md z-30 flex items-center justify-between">
+              <div className="absolute bottom-16 left-4 right-4 rounded-2xl bg-[#24211D]/95 border border-[#F4B942]/50 p-3 text-white shadow-2xl backdrop-blur-md z-30 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <Volume2 size={16} className="text-purple-300 shrink-0" />
+                  <Volume2 size={16} className="text-[#F4B942] shrink-0" />
                   <div>
-                    <p className="text-[10px] font-mono text-purple-300 uppercase font-bold">Message from Interviewer</p>
+                    <p className="text-[10px] font-mono text-[#F4B942] uppercase font-bold">Message from Interviewer</p>
                     <p className="text-xs font-semibold">{proctorToast}</p>
                   </div>
                 </div>
-                <button onClick={() => setProctorToast(null)} className="text-purple-300 hover:text-white">
+                <button onClick={() => setProctorToast(null)} className="text-[#F4B942] hover:text-white">
                   <X size={15} />
                 </button>
               </div>
@@ -1839,7 +1839,7 @@ export function VideoInterview({
               <button
                 onClick={() => setShowBoundingBoxes((b) => !b)}
                 className={`grid size-9 place-items-center rounded-xl transition ${
-                  showBoundingBoxes ? "text-[#a38fff] hover:bg-white/20" : "text-white/60 hover:bg-white/20"
+                  showBoundingBoxes ? "text-[#F4B942] hover:bg-white/20" : "text-white/60 hover:bg-white/20"
                 }`}
                 title={showBoundingBoxes ? "Hide bounding boxes" : "Show bounding boxes"}
               >
@@ -1848,7 +1848,7 @@ export function VideoInterview({
               <button
                 onClick={() => setShowMesh((m) => !m)}
                 className={`grid size-9 place-items-center rounded-xl transition ${
-                  showMesh ? "text-[#38bdf8] hover:bg-white/20" : "text-white/60 hover:bg-white/20"
+                  showMesh ? "text-[#F4B942] hover:bg-white/20" : "text-white/60 hover:bg-white/20"
                 }`}
                 title={showMesh ? "Hide 3D Face Wireframe" : "Show 3D Face Wireframe"}
               >
@@ -1870,10 +1870,10 @@ export function VideoInterview({
           {/* Live Telemetry HUD Bar (Rules 1-5 Real-time metrics) */}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {/* Rule 1 & 2: Faces */}
-            <div className="rounded-2xl border border-[#eeeaf4] bg-white p-3 shadow-sm">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9b94a0]">Face Detection</span>
+            <div className="rounded-2xl border border-[#EDE6DA] bg-white p-3 shadow-sm">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6F675C]">Face Detection</span>
               <div className="mt-1 flex items-center justify-between">
-                <span className="text-xs font-bold text-[#2d2640]">
+                <span className="text-xs font-bold text-[#24211D]">
                   {antiCheatData ? `${antiCheatData.face_count} Person` : "1 Person"}
                 </span>
                 <span
@@ -1885,10 +1885,10 @@ export function VideoInterview({
             </div>
 
             {/* Rule 3: Head Pose */}
-            <div className="rounded-2xl border border-[#eeeaf4] bg-white p-3 shadow-sm">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9b94a0]">Head Pose</span>
+            <div className="rounded-2xl border border-[#EDE6DA] bg-white p-3 shadow-sm">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6F675C]">Head Pose</span>
               <div className="mt-1 flex items-center justify-between">
-                <span className="text-xs font-bold text-[#2d2640]">
+                <span className="text-xs font-bold text-[#24211D]">
                   {telemetry?.head_pose?.direction || "CENTER"} (Yaw {telemetry?.head_pose?.yaw ?? 0}°)
                 </span>
                 <span
@@ -1900,10 +1900,10 @@ export function VideoInterview({
             </div>
 
             {/* Rule 4: Eye Gaze */}
-            <div className="rounded-2xl border border-[#eeeaf4] bg-white p-3 shadow-sm">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9b94a0]">Eye Gaze</span>
+            <div className="rounded-2xl border border-[#EDE6DA] bg-white p-3 shadow-sm">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6F675C]">Eye Gaze</span>
               <div className="mt-1 flex items-center justify-between">
-                <span className="text-xs font-bold text-[#2d2640]">
+                <span className="text-xs font-bold text-[#24211D]">
                   {telemetry?.eye_gaze?.direction || "CENTER"}
                 </span>
                 <span
@@ -1915,10 +1915,10 @@ export function VideoInterview({
             </div>
 
             {/* Rule 5: YOLO Objects */}
-            <div className="rounded-2xl border border-[#eeeaf4] bg-white p-3 shadow-sm">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9b94a0]">YOLO Object Scan</span>
+            <div className="rounded-2xl border border-[#EDE6DA] bg-white p-3 shadow-sm">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6F675C]">YOLO Object Scan</span>
               <div className="mt-1 flex items-center justify-between">
-                <span className="text-xs font-bold text-[#2d2640]">
+                <span className="text-xs font-bold text-[#24211D]">
                   {boxes?.objects?.some((o) => o.flagged) ? "Item Detected ⚠️" : "Clean"}
                 </span>
                 <span
@@ -1934,11 +1934,11 @@ export function VideoInterview({
         {/* Right Column: AI Interviewer & Answer Panel OR Proctor Dashboard */}
         <div className="flex flex-col gap-3">
           {/* Tab Selector */}
-          <div className="flex rounded-2xl border border-[#eeeaf4] bg-white p-1">
+          <div className="flex rounded-2xl border border-[#EDE6DA] bg-white p-1">
             <button
               onClick={() => setActiveTab("interview")}
               className={`flex-1 rounded-xl py-2 text-xs font-semibold transition ${
-                activeTab === "interview" ? "bg-[#7257df] text-white shadow-sm" : "text-[#7b748d] hover:text-[#2d2640]"
+                activeTab === "interview" ? "bg-[#F4B942] text-[#24211D] shadow-sm" : "text-[#6F675C] hover:text-[#24211D]"
               }`}
             >
               Interview & Answer
@@ -1946,7 +1946,7 @@ export function VideoInterview({
             <button
               onClick={() => setActiveTab("proctor")}
               className={`flex-1 rounded-xl py-2 text-xs font-semibold transition ${
-                activeTab === "proctor" ? "bg-[#7257df] text-white shadow-sm" : "text-[#7b748d] hover:text-[#2d2640]"
+                activeTab === "proctor" ? "bg-[#F4B942] text-[#24211D] shadow-sm" : "text-[#6F675C] hover:text-[#24211D]"
               }`}
             >
               Proctor Dashboard ({allSessionEvents.length})
@@ -1956,33 +1956,33 @@ export function VideoInterview({
           {activeTab === "interview" ? (
             <>
               {/* AI Interviewer Tile */}
-              <div className="rounded-3xl border border-[#eeeaf4] bg-white p-5 shadow-sm">
+              <div className="rounded-2xl border border-[#EDE6DA] bg-white p-5 shadow-sm">
                 <AIAvatar speaking={aiSpeaking} role={activeTopic} />
                 {q && (
                   <div className="mt-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#7257df]">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#75451F]">
                         Question {currentQ + 1} of {questions.length} · {q.topic}
                       </span>
                       {aiSpeaking && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2.5 py-0.5 text-[10px] font-bold text-purple-700 animate-pulse">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#FFF5E5] px-2.5 py-0.5 text-[10px] font-bold text-[#75451F] animate-pulse">
                           <Volume2 size={12} /> AI Asking Question…
                         </span>
                       )}
                     </div>
-                    <h3 className="mt-2 text-base font-semibold leading-relaxed text-[#2d2640]">{q.prompt}</h3>
-                    {q.why && <p className="mt-2 text-[11px] leading-4 text-[#8f88a0]">{q.why}</p>}
+                    <h3 className="mt-2 text-base font-semibold leading-relaxed text-[#24211D]">{q.prompt}</h3>
+                    {q.why && <p className="mt-2 text-[11px] leading-4 text-[#6F675C]">{q.why}</p>}
                   </div>
                 )}
-                <div className="mt-3.5 flex items-center justify-between border-t border-[#f1edf8] pt-3 text-[11px] text-[#8f88a0]">
+                <div className="mt-3.5 flex items-center justify-between border-t border-[#EDE6DA] pt-3 text-[11px] text-[#6F675C]">
                   <button
                     onClick={() => replayQuestionPrompt()}
                     disabled={aiSpeaking}
-                    className="inline-flex items-center gap-1.5 font-semibold text-[#7257df] hover:underline disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 font-semibold text-[#75451F] hover:underline disabled:opacity-50"
                   >
                     <Volume2 size={13} /> Replay Audio Prompt
                   </button>
-                  <span className="rounded-md bg-[#f6f4fa] px-2 py-0.5 text-[10px] font-medium text-[#7a748c]">
+                  <span className="rounded-md bg-[#FFFCF6] px-2 py-0.5 text-[10px] font-medium text-[#6F675C]">
                     Voice-Only Mode Active
                   </span>
                 </div>
@@ -1990,22 +1990,22 @@ export function VideoInterview({
 
               {/* Candidate Voice Answer Station */}
               {(phase === "answering" || phase === "question") && (
-                <div className="rounded-3xl border border-[#eeeaf4] bg-white p-5 shadow-sm">
+                <div className="rounded-2xl border border-[#EDE6DA] bg-white p-5 shadow-sm">
                   {/* Status Header */}
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-[#2d2640]">Your Spoken Response</span>
+                      <span className="text-xs font-semibold text-[#24211D]">Your Spoken Response</span>
                       {listening ? (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-500/30 animate-pulse">
                           <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
                           MIC LIVE · SPEAK NOW
                         </span>
                       ) : aiSpeaking ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-semibold text-purple-700 ring-1 ring-purple-400/40">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#FFF5E5] px-2.5 py-0.5 text-[10px] font-semibold text-[#75451F] ring-1 ring-[#F4B942]/40">
                           <Volume2 size={11} className="animate-bounce" /> Listening for AI to finish…
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#FFF5E5] px-2.5 py-0.5 text-[10px] font-semibold text-[#75451F]">
                           Mic Paused
                         </span>
                       )}
@@ -2023,7 +2023,7 @@ export function VideoInterview({
                             setTimeout(() => startListening(), 100);
                           }
                         }}
-                        className="rounded-lg border border-[#e6e2ee] bg-[#faf9fe] px-2 py-1 text-[10px] font-semibold text-[#675f78] focus:border-[#7257df] focus:outline-none"
+                        className="rounded-lg border border-[#EDE6DA] bg-[#FFFCF6] px-2 py-1 text-[10px] font-semibold text-[#6F675C] focus:border-[#F4B942] focus:outline-none"
                         title="Speech Recognition Dialect / Accent"
                       >
                         <option value="en-US">English (US)</option>
@@ -2031,7 +2031,7 @@ export function VideoInterview({
                         <option value="en-GB">English (UK)</option>
                       </select>
 
-                      <span className="text-[10px] font-medium text-[#8f88a0]">
+                      <span className="text-[10px] font-medium text-[#6F675C]">
                         {answer.trim().split(/\s+/).filter(Boolean).length} words
                       </span>
                     </div>
@@ -2039,8 +2039,8 @@ export function VideoInterview({
 
                   {/* AI Speaking Banner */}
                   {aiSpeaking && (
-                    <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-purple-200 bg-purple-50/80 p-3 text-xs text-purple-900">
-                      <Volume2 size={16} className="shrink-0 text-[#7257df] animate-pulse" />
+                    <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-[#EDE6DA] bg-[#FFF5E5] p-3 text-xs text-[#75451F]">
+                      <Volume2 size={16} className="shrink-0 text-[#75451F] animate-pulse" />
                       <span>
                         The AI Interviewer is reading Question {currentQ + 1} of {questions.length} aloud.{" "}
                         <strong>Your microphone will activate automatically</strong> the moment reading completes.
@@ -2103,9 +2103,9 @@ export function VideoInterview({
                           ? "🎙️ Speak aloud into your microphone... Your words will transcribe here in real time (you can also edit or type directly)."
                           : "Microphone is waiting for AI to finish reading, or click 'Resume Mic' below to speak your response."
                       }
-                      className="w-full resize-none rounded-2xl border border-[#e8e4f0] bg-[#faf9fe] p-3.5 text-xs leading-6 text-[#231b34] placeholder:text-[#a59eb2] focus:border-[#7257df] focus:bg-white focus:outline-none"
+                      className="w-full resize-none rounded-2xl border border-[#EDE6DA] bg-[#FFFCF6] p-3.5 text-xs leading-6 text-[#24211D] placeholder:text-[#6F675C] focus:border-[#F4B942] focus:bg-white focus:outline-none"
                     />
-                    <div className="mt-1.5 flex items-center justify-between text-[10px] text-[#9b94a8]">
+                    <div className="mt-1.5 flex items-center justify-between text-[10px] text-[#6F675C]">
                       <span className="flex items-center gap-1">
                         {listening ? (
                           <span className="text-emerald-700 font-medium">● Live voice transcription stream active</span>
@@ -2128,7 +2128,7 @@ export function VideoInterview({
                         className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition ${
                           listening
                             ? "border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
-                            : "border-[#eeeaf4] text-[#746d85] hover:bg-[#faf9fc]"
+                            : "border-[#EDE6DA] text-[#6F675C] hover:bg-[#FFFCF6]"
                         }`}
                       >
                         {listening ? (
@@ -2149,7 +2149,7 @@ export function VideoInterview({
                             finalTranscriptRef.current = "";
                             setInterimText("");
                           }}
-                          className="inline-flex items-center gap-1 rounded-xl border border-[#eeeaf4] px-2.5 py-2 text-xs text-[#8f88a0] hover:text-[#5d5671]"
+                          className="inline-flex items-center gap-1 rounded-xl border border-[#EDE6DA] px-2.5 py-2 text-xs text-[#6F675C] hover:text-[#6F675C]"
                           title="Clear transcribed text and re-speak"
                         >
                           Clear Text
@@ -2160,7 +2160,7 @@ export function VideoInterview({
                     <button
                       onClick={() => void submitAnswer()}
                       disabled={answer.trim().split(/\s+/).filter(Boolean).length < 2 || evaluating}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-[#7257df] px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-[#6349ce] disabled:opacity-40"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-[#F4B942] px-4 py-2.5 text-xs font-semibold text-[#24211D] shadow-sm hover:bg-[#E99A32] disabled:opacity-40"
                     >
                       {evaluating ? (
                         <>
@@ -2178,31 +2178,31 @@ export function VideoInterview({
               )}
 
               {phase === "evaluating" && (
-                <div className="flex flex-col items-center justify-center rounded-3xl border border-[#eeeaf4] bg-white p-8 text-center shadow-sm">
-                  <Loader2 size={26} className="animate-spin text-[#7257df]" />
-                  <p className="mt-3 text-xs font-semibold text-[#2d2640]">Scoring response with AI rubric…</p>
-                  <p className="text-[10px] text-[#8f88a0]">Relevance + Communication + Technical Depth</p>
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-[#EDE6DA] bg-white p-8 text-center shadow-sm">
+                  <Loader2 size={26} className="animate-spin text-[#75451F]" />
+                  <p className="mt-3 text-xs font-semibold text-[#24211D]">Scoring response with AI rubric…</p>
+                  <p className="text-[10px] text-[#6F675C]">Relevance + Communication + Technical Depth</p>
                 </div>
               )}
             </>
           ) : (
             /* Proctor Dashboard Side Panel */
-            <div className="rounded-3xl border border-[#eeeaf4] bg-white p-5 shadow-sm">
-              <div className="flex items-center justify-between border-b border-[#f1edf8] pb-3">
-                <p className="text-xs font-semibold text-[#2d2640]">Live Suspicious Events Feed</p>
-                <span className="text-[10px] font-bold text-[#7257df]">Real-Time Audit</span>
+            <div className="rounded-2xl border border-[#EDE6DA] bg-white p-5 shadow-sm">
+              <div className="flex items-center justify-between border-b border-[#EDE6DA] pb-3">
+                <p className="text-xs font-semibold text-[#24211D]">Live Suspicious Events Feed</p>
+                <span className="text-[10px] font-bold text-[#75451F]">Real-Time Audit</span>
               </div>
 
               <div className="mt-3 space-y-2 max-h-[360px] overflow-y-auto">
                 {allSessionEvents.length === 0 ? (
-                  <div className="py-8 text-center text-xs text-[#8f88a0]">
-                    <ShieldCheck size={28} className="mx-auto mb-2 text-[#3f8b60]" />
+                  <div className="py-8 text-center text-xs text-[#6F675C]">
+                    <ShieldCheck size={28} className="mx-auto mb-2 text-[#2E7D32]" />
                     No suspicious events detected yet.
                     <p className="mt-1 text-[10px]">Candidate is verified and compliant.</p>
                   </div>
                 ) : (
                   allSessionEvents.map((ev, i) => (
-                    <div key={i} className="rounded-xl border border-[#f0edf7] bg-[#fbfaff] p-2.5 text-xs">
+                    <div key={i} className="rounded-xl border border-[#EDE6DA] bg-[#FFFCF6] p-2.5 text-xs">
                       <div className="flex items-center justify-between">
                         <span
                           className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
@@ -2210,14 +2210,14 @@ export function VideoInterview({
                               ? "bg-red-100 text-red-700"
                               : ev.severity === "MEDIUM"
                               ? "bg-amber-100 text-amber-700"
-                              : "bg-blue-100 text-blue-700"
+                              : "bg-[#FFF5E5] text-[#75451F]"
                           }`}
                         >
                           {ev.severity}
                         </span>
-                        <span className="text-[10px] text-[#8f88a0]">{ev.duration_seconds ? `${ev.duration_seconds}s` : "alert"}</span>
+                        <span className="text-[10px] text-[#6F675C]">{ev.duration_seconds ? `${ev.duration_seconds}s` : "alert"}</span>
                       </div>
-                      <p className="mt-1 text-[11px] font-medium text-[#2d2640]">{ev.description}</p>
+                      <p className="mt-1 text-[11px] font-medium text-[#24211D]">{ev.description}</p>
                     </div>
                   ))
                 )}
