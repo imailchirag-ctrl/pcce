@@ -35,8 +35,7 @@ function GamesPage() {
   const [codingChallenge, setCodingChallenge] = useState<CodingChallenge | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300);
-  const timeLeftRef = useRef(timeLeft);
-  timeLeftRef.current = timeLeft;
+  const timeLeftRef = useRef(300);
   const timeoutHandlerRef = useRef<() => void>(() => {});
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -46,7 +45,15 @@ function GamesPage() {
   const [warnings, setWarnings] = useState(0);
 
   // Stats storage
-  const [stats, setStats] = useState<GameStats>({ wins: 0, losses: 0, streak: 0 });
+  const [stats, setStats] = useState<GameStats>(() => {
+    if (typeof window === "undefined") return { wins: 0, losses: 0, streak: 0 };
+    try {
+      const saved = localStorage.getItem("skillbridge_battle_stats");
+      return saved ? (JSON.parse(saved) as GameStats) : { wins: 0, losses: 0, streak: 0 };
+    } catch {
+      return { wins: 0, losses: 0, streak: 0 };
+    }
+  });
 
   // Coding state
   const [code, setCode] = useState("// Write your optimal solution here\nfunction solve(arr) {\n  \n}");
@@ -61,13 +68,9 @@ function GamesPage() {
   const [questionTimes, setQuestionTimes] = useState<Record<number, number>>({});
   const [timedOutQuestions, setTimedOutQuestions] = useState<Set<number>>(new Set());
 
-  // Load stats
   useEffect(() => {
-    const saved = localStorage.getItem("skillbridge_battle_stats");
-    if (saved) {
-      try { setStats(JSON.parse(saved)); } catch {}
-    }
-  }, []);
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
 
   // ESC key listener for pause / cancel
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -81,11 +84,51 @@ function GamesPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // Restore the remaining time when returning to a skipped question.
+  const endMatch = useCallback((result: "win" | "loss") => {
+    setMatchOver(true);
+    setMatchResult(result);
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+
+    const nextStats = {
+      wins: result === "win" ? stats.wins + 1 : stats.wins,
+      losses: result === "loss" ? stats.losses + 1 : stats.losses,
+      streak: result === "win" ? stats.streak + 1 : 0,
+    };
+    setStats(nextStats);
+    localStorage.setItem("skillbridge_battle_stats", JSON.stringify(nextStats));
+  }, [stats]);
+
+  const finalizeMatch = useCallback((answers = selectedAnswers, codingScore?: number, codingCorrect = false) => {
+    const finalCorrectCount = selectedMode === "coding"
+      ? Number(codingCorrect)
+      : Object.entries(answers).reduce((total, [index, answer]) => total + Number(questionsList[Number(index)]?.correct === answer), 0);
+    const finalScore = selectedMode === "coding" ? (codingScore ?? 0) : Math.round((finalCorrectCount / Math.max(1, questionsList.length)) * 100);
+    setCorrectCount(finalCorrectCount);
+    setScore(finalScore);
+    const simulatedOpponent = Math.floor(Math.random() * 150) + 180;
+    const scaledOpponent = Math.round(simulatedOpponent / 4.5);
+    setOpponentScore(scaledOpponent);
+    const won = finalScore >= scaledOpponent;
+    endMatch(won ? "win" : "loss");
+  }, [endMatch, questionsList, selectedAnswers, selectedMode]);
+
+  const handleTimeoutNext = useCallback(() => {
+    const nextTimedOut = new Set(timedOutQuestions);
+    nextTimedOut.add(currentQIndex);
+    setTimedOutQuestions(nextTimedOut);
+    const nextIdx = questionsList.findIndex((_, index) => index > currentQIndex && !nextTimedOut.has(index));
+    if (nextIdx >= 0) {
+      setCurrentQIndex(nextIdx);
+      setVisitedQuestions((visited) => new Set(visited).add(nextIdx));
+      setTimeLeft(questionTimes[nextIdx] ?? (selectedMode === "logical" ? 60 : 30));
+      return;
+    }
+    finalizeMatch();
+  }, [currentQIndex, finalizeMatch, questionTimes, questionsList, selectedMode, timedOutQuestions]);
+
   useEffect(() => {
-    if (!matchStarted || matchOver || isPaused || loadingQuestions || selectedMode === "coding") return;
-    setTimeLeft(questionTimes[currentQIndex] ?? (selectedMode === "logical" ? 60 : 30));
-  }, [currentQIndex, matchStarted, matchOver, isPaused, loadingQuestions, selectedMode]);
+    timeoutHandlerRef.current = handleTimeoutNext;
+  }, [handleTimeoutNext]);
 
   // Timer loop
   useEffect(() => {
@@ -107,7 +150,7 @@ function GamesPage() {
       }
     }, 1000);
     return () => clearInterval(timer);
-  }, [matchStarted, matchOver, isPaused, loadingQuestions, currentQIndex, selectedMode, selectedAnswers]);
+  }, [matchStarted, matchOver, isPaused, loadingQuestions, currentQIndex, selectedMode, selectedAnswers, finalizeMatch]);
 
   // Anti-cheat Fullscreen & Tab Switch Detection
   useEffect(() => {
@@ -137,7 +180,7 @@ function GamesPage() {
         document.exitFullscreen().catch(() => {});
       }
     };
-  }, [matchStarted, matchOver, isPaused, loadingQuestions]);
+  }, [matchStarted, matchOver, isPaused, loadingQuestions, endMatch]);
 
   const startMatch = async (mode: GameMode) => {
     setSelectedMode(mode);
@@ -192,47 +235,6 @@ function GamesPage() {
     } finally {
       setLoadingQuestions(false);
     }
-  };
-
-  const handleTimeoutNext = () => {
-    setTimedOutQuestions((timedOut) => new Set(timedOut).add(currentQIndex));
-    const nextIdx = questionsList.findIndex((_, index) => index > currentQIndex && !timedOutQuestions.has(index));
-    if (nextIdx >= 0) {
-      setCurrentQIndex(nextIdx);
-      setVisitedQuestions(new Set(visitedQuestions).add(nextIdx));
-      setTimeLeft(questionTimes[nextIdx] ?? (selectedMode === "logical" ? 60 : 30));
-    } else {
-      finalizeMatch();
-    }
-  };
-  timeoutHandlerRef.current = handleTimeoutNext;
-
-  const finalizeMatch = (answers = selectedAnswers, codingScore?: number, codingCorrect = false) => {
-    const finalCorrectCount = selectedMode === "coding"
-      ? Number(codingCorrect)
-      : Object.entries(answers).reduce((total, [index, answer]) => total + Number(questionsList[Number(index)]?.correct === answer), 0);
-    const finalScore = selectedMode === "coding" ? (codingScore ?? 0) : Math.round((finalCorrectCount / Math.max(1, questionsList.length)) * 100);
-    setCorrectCount(finalCorrectCount);
-    setScore(finalScore);
-    const simulatedOpponent = Math.floor(Math.random() * 150) + 180;
-    const scaledOpponent = Math.round(simulatedOpponent / 4.5);
-    setOpponentScore(scaledOpponent);
-    const won = finalScore >= scaledOpponent;
-    endMatch(won ? "win" : "loss");
-  };
-
-  const endMatch = (result: "win" | "loss") => {
-    setMatchOver(true);
-    setMatchResult(result);
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-
-    const newStats = {
-      wins: result === "win" ? stats.wins + 1 : stats.wins,
-      losses: result === "loss" ? stats.losses + 1 : stats.losses,
-      streak: result === "win" ? stats.streak + 1 : 0,
-    };
-    setStats(newStats);
-    localStorage.setItem("skillbridge_battle_stats", JSON.stringify(newStats));
   };
 
   const submitCodeForAi = async () => {
